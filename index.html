@@ -397,7 +397,14 @@ body[data-av="charts"] #anaCard>:not(.ana-bar),body[data-av="cmp"] #anaCard>:not
 .ana-right{display:flex;flex-direction:column;gap:16px}
 .ana-right .jchart{margin:0}
 .ana-right .pie-wrap{gap:14px}
-@media(max-width:1180px){.ana-dash{grid-template-columns:minmax(0,1fr)}}
+.ana-dash,.ana-dash.nopie{display:flex;flex-direction:column;gap:18px;align-items:stretch}
+.ana-kpis{order:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.ana-kpis:empty{display:none}
+.ana-kpi{background:linear-gradient(160deg,#0f2f57,#0b4f7a);color:#fff;border-radius:14px;padding:12px 14px;min-width:0}.ana-kpi small{display:block;font-size:11.5px;color:#a9d3f2;letter-spacing:.03em}.ana-kpi b{display:block;font-size:19px;line-height:1.15;margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ana-kpi em{font-style:normal;font-size:12px;color:#cfe3f7}.ana-kpi.gold{background:linear-gradient(160deg,#92400e,#d97706)}.ana-kpi.grn{background:linear-gradient(160deg,#065f46,#059669)}
+.ana-ov{order:1;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}.ana-ov:empty{display:none}.ana-ov .jchart{margin:0;min-width:0}
+.ana-dash>.ana-right{order:2;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}.ana-dash>.ana-leftc{order:3}
+.ana-mx-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 6px;font-size:12.5px}.ana-mx-ctl select{padding:4px 8px}
+.ana-mx text{font-size:11.5px}.ana-mx .q{font-size:12px;font-weight:800;opacity:.85}
+@media(max-width:1100px){.ana-ov{grid-template-columns:minmax(0,1fr)}}
 
 .vs-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:18px;align-items:start}
 .vs-grid .jchart{margin:0 0 16px}.vs-kz{margin:0 0 16px}
@@ -714,6 +721,7 @@ details.cins-wrap .cins{margin-top:8px;border-top:0;padding-top:0}
 @media print{#splitRaceWrap{display:none!important}}
 .sr-bibbtn .sr-fl{font-size:26px;line-height:1;margin-bottom:2px}.sr-bibbtn b{font-size:clamp(40px,5.6vw,58px)!important;line-height:1}.sr-bibbtn{min-height:118px}
 .sr-tend .sr-tm{display:inline-block;font-size:clamp(30px,4vw,44px);line-height:1.1;font-variant-numeric:tabular-nums;border-radius:8px;padding:0 10px;margin:2px 2px}.sr-tend.slow .sr-tm{background:#7f1d1d;color:#fecaca}.sr-tend.fast .sr-tm{background:#064e3b;color:#a7f3d0}
+.trj-hl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 12px;font-size:13px}.trj-hl .chip{border:1px solid #cbd5e1;background:#f1f5f9;color:#0b1f3a;border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer}.trj-hl .chip.on{background:#fbbf24;border-color:#d97706;font-weight:800}.trj-gcbar{margin:0 0 10px}
 /*TM-CSS-END*/
 </style>
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1308,6 +1316,8 @@ details.cins-wrap .cins{margin-top:8px;border-top:0;padding-top:0}
 </div>
 <div class="actions noprint" style="margin-top:4px"><button onclick="printSection('anaChartCard')">Drucken / PDF</button></div>
 <div class="ana-dash" id="anaDash">
+<div class="ana-kpis" id="anaDKpis"></div>
+<div class="ana-ov" id="anaOv"></div>
 <div class="ana-leftc"><div class="chartbox ana-left" id="anaLeft"><div id="anaChart"></div><div id="anaScatter"></div><div id="anaSpeedX"></div><div id="anaGroups"></div></div></div>
 <div class="chartbox ana-right pie-row" id="anaPies"></div>
 </div>
@@ -1413,7 +1423,7 @@ details.cins-wrap .cins{margin-top:8px;border-top:0;padding-top:0}
 <div class="trj-wb noprint" id="trjLibCard" aria-label="Arbeitsmappe"><div class="trj-tabstrip" id="trjLibList" role="tablist"></div><button type="button" class="trj-tab-add" onclick="trjNew()" title="Neue Einheit (leeres Blatt)">+</button><button type="button" class="trj-tab-copy" onclick="trjCopy(trj.id)" title="Neue Einheit mit denselben Sportlern, ohne Werte">Mit Sportlern neu</button></div>
 
 <section class="card tr-nb" id="trjSetCard">
-<div class="tr-head"><h2>Sprungtraining <span class="tr-tag">Training</span></h2><div class="acts noprint"><button type="button" class="secondary small" onclick="trjNew()">Neue Einheit</button><button type="button" class="secondary small" onclick="trjCsv()">CSV</button><button type="button" class="small" onclick="trjPrintAll()">Alles drucken</button></div></div>
+<div class="tr-head"><h2>Sprungtraining <span class="tr-tag">Training</span></h2><div class="acts noprint"><button type="button" class="secondary small" onclick="trjNew()">Neue Einheit</button><button type="button" class="secondary small" onclick="trjExportDlg()">Einheit exportieren</button><button type="button" class="secondary small" onclick="$('trjImpFile').click()">Einheit importieren</button><input type="file" id="trjImpFile" accept=".json,application/json" style="display:none" onchange="trjImportFile(this.files);this.value=''"><button type="button" class="small" onclick="trjPrintAll()">Alles drucken</button></div></div>
 <div class="tr-printhead" data-trh></div>
 <div class="grid" id="trjMeta">
 <div><label>Bezeichnung</label><input id="trj_title" placeholder="z. B. Sprungtraining Mittwoch" oninput="trjMetaSave()"></div>
@@ -1454,12 +1464,14 @@ details.cins-wrap .cins{margin-top:8px;border-top:0;padding-top:0}
 <section class="card" id="trjSpeedCard">
 <div class="tr-head"><h2>Speed-Analyse</h2><div class="acts noprint"><button type="button" class="secondary small" onclick="trPrint(['trjSpeedCard'])">Drucken</button></div></div>
 <div class="tr-printhead" data-trh></div>
+<div id="trjSpeedBar"></div>
 <div id="trjSpeedCharts"></div>
 </section>
 
 <section class="card" id="trjWeiteCard">
 <div class="tr-head"><h2>Weiten-Analyse</h2><div class="acts noprint"><button type="button" class="secondary small" onclick="trPrint(['trjWeiteCard'])">Drucken</button></div></div>
 <div class="tr-printhead" data-trh></div>
+<div id="trjWeiteBar"></div>
 <div id="trjWeiteCharts"></div>
 </section>
 
@@ -4573,10 +4585,10 @@ function anaNiceStep(range,target,time){
  if(time){const raw=range/target; return [1,2,5,10,15,30,60,120,300,600].find(v=>v>=raw)||900}
 const raw=range/target, p=Math.pow(10,Math.floor(Math.log10(raw||1))), m=raw/p; return (m<1.5?1:m<3?2:m<7?5:10)*p}
 
-const ANA_CH=[['main','Abstand zum Besten'],['scatter','Speed × Weite'],['sgate','Speed nach Luke'],['sref','Speed zum Bezugsniveau'],['sall','Speed gesamt'],['cnt','Teilnehmer je Verband/Verein'],['best','Beste Platzierung'],['fast','Schnellste Laufzeit'],['rgap','Rückstand Lauf in %'],['sgap','Rückstand Sprung in %'],['avgj','Ø Sprung'],['avgt','Ø Lauf'],['pieCnt','Kuchen: Sportler'],['pieTop','Kuchen: Top 10'],['pieT3','Kuchen: Top 3'],['pieT5','Kuchen: Top 5'],['grpSucc','Erfolg je Verband/Verein'],['pieStat','Kuchen: Wertung']];
+const ANA_CH=[['main','Abstand zum Besten'],['scatter','Speed × Weite'],['sgate','Speed nach Luke'],['sref','Speed zum Bezugsniveau'],['sall','Speed gesamt'],['cnt','Teilnehmer je Verband/Verein'],['best','Beste Platzierung'],['fast','Schnellste Laufzeit'],['rgap','Rückstand Lauf in %'],['sgap','Rückstand Sprung in %'],['avgj','Ø Sprung'],['avgt','Ø Lauf'],['pieCnt','Kuchen: Sportler'],['pieTop','Kuchen: Top 10'],['pieT3','Kuchen: Top 3'],['pieT5','Kuchen: Top 5'],['grpSucc','Erfolg je Verband/Verein'],['matrix','Matrix Masse × Klasse'],['kpis','Kennzahlen-Kacheln'],['pieStat','Kuchen: Wertung']];
 // Kategorien der Diagrammauswahl: [Titel, Schlüssel, Bedingung]
-const ANA_CHCAT=[['Allgemein',['main','cnt','best'],()=>true],['Speed',['scatter','sgate','sref','sall'],A=>A.has.speed],['Weite & Sprung',['sgap','avgj'],A=>A.has.dist||A.has.pts||A.has.total],['Lauf',['fast','rgap','avgt'],A=>A.has.time||A.has.ttime],['Kuchendiagramme',['pieCnt','pieT3','pieT5','pieTop','pieStat','grpSucc'],()=>true]];
-let anaCh={main:true,scatter:true,sgate:true,sref:true,sall:true,cnt:true,best:true,fast:true,rgap:true,sgap:true,avgj:false,avgt:false,pieCnt:true,pieTop:true,pieT3:true,pieT5:true,grpSucc:true,pieStat:true}, anaPct=false;
+const ANA_CHCAT=[['Allgemein',['main','cnt','best'],()=>true],['Speed',['scatter','sgate','sref','sall'],A=>A.has.speed],['Weite & Sprung',['sgap','avgj'],A=>A.has.dist||A.has.pts||A.has.total],['Lauf',['fast','rgap','avgt'],A=>A.has.time||A.has.ttime],['Dashboard',['kpis','matrix','grpSucc'],()=>true],['Kuchendiagramme',['pieCnt','pieT3','pieT5','pieTop','pieStat'],()=>true]];
+let anaCh={main:true,scatter:true,sgate:true,sref:true,sall:true,cnt:true,best:true,fast:true,rgap:true,sgap:true,avgj:false,avgt:false,pieCnt:true,pieTop:true,pieT3:true,pieT5:true,grpSucc:true,matrix:true,kpis:true,pieStat:true}, anaPct=false;
 try{Object.assign(anaCh,JSON.parse(localStorage.getItem('nk_anach')||'{}')); anaPct=localStorage.getItem('nk_anapct')==='1'}catch(e){}
 function anaToggleCh(k){anaCh[k]=!anaCh[k]; try{localStorage.setItem('nk_anach',JSON.stringify(anaCh))}catch(e){} anaRenderCharts()}
 function anaSetPct(v){anaPct=v; try{localStorage.setItem('nk_anapct',v?'1':'0')}catch(e){} anaRenderCharts()}
@@ -4596,20 +4608,82 @@ function pieChart(title,sub,items,unit){
 }
 function anaGrpBy(A){const v=$('anaGrp').value, nat=A.E.some(e=>e.nat), club=A.E.some(e=>e.club); if(v==='name') return 'name'; if(v==='club'&&club) return 'club'; if(v==='nat'&&nat) return 'nat'; return nat?'nat':(club?'club':'name')}
 function anaGKey(e,by,comb){if(by==='club') return anaClubName(e.club); return by==='name'?((e.name||'')+(comb&&e.sec?' · '+e.sec:'')):(e[by]||'').trim()}
+// ---- Dashboard: Kennzahlen, Matrix Masse × Klasse, Erfolgsbalken ----
+let anaMxM='avg';
+try{anaMxM=localStorage.getItem('nk_mxm')||'avg'}catch(e){}
+function anaSetMx(v){anaMxM=v; try{localStorage.setItem('nk_mxm',v)}catch(e){} anaRenderCharts()}
+const anaRk=e=>e.rank!=null?e.rank:(e.totalRank!=null?e.totalRank:(e.timeRank!=null?e.timeRank:null));
+function anaGroupStats(A){
+ const by=anaGrpBy(A); if(by==='name') return null;
+ const G=new Map(); A.E.forEach(e=>{const k=anaGKey(e,by,A.combined); if(k){if(!G.has(k)) G.set(k,[]); G.get(k).push(e)}});
+ const N=A.E.length;
+ const rows=[...G].map(([label,l])=>{const r=l.map(anaRk).filter(x=>x!=null), c=n=>r.filter(x=>x<=n).length, pts=l.map(e=>e.total).filter(v=>v!=null);
+  return {label,n:l.length,ranks:r,t3:c(3),t5:c(5),t10:c(10),avg:r.length?r.reduce((a,b)=>a+b,0)/r.length:null,pod:r.length?c(3)/l.length:0,top10:l.length?c(10)/l.length:0,pts:pts.length?pts.reduce((a,b)=>a+b,0)/pts.length:null,best:r.length?Math.min(...r):null}});
+ return {by,lab:by==='nat'?'Verband':'Verein',rows,N,G};
+}
+function anaDashboard(A){
+ const K=$('anaDKpis'), O=$('anaOv'); const st=anaGroupStats(A);
+ const fin=A.E.filter(e=>!e.status).length;
+ if(!st||!st.rows.length||!anaCh.kpis){K.innerHTML=''} else {
+  const R=st.rows, bestPod=[...R].sort((a,b)=>b.t3-a.t3||b.t5-a.t5||b.n-a.n)[0], biggest=[...R].sort((a,b)=>b.n-a.n)[0], withAvg=R.filter(r=>r.avg!=null&&r.n>=2), eff=[...withAvg].sort((a,b)=>a.avg-b.avg)[0];
+  K.innerHTML=`<div class="ana-kpi"><small>Starter</small><b>${A.E.length}</b><em>${fin} gewertet</em></div><div class="ana-kpi"><small>${st.lab}e</small><b>${R.length}</b><em>${R.filter(r=>r.t3>0).length} mit Podium</em></div>`+
+   (bestPod&&bestPod.t3>0?`<div class="ana-kpi gold"><small>Meiste Podiumsplätze</small><b title="${esc(bestPod.label)}">${esc(bestPod.label)}</b><em>${bestPod.t3}× Top 3 · ${bestPod.n} Starter</em></div>`:'')+
+   `<div class="ana-kpi"><small>Größte Mannschaft</small><b title="${esc(biggest.label)}">${esc(biggest.label)}</b><em>${biggest.n} Starter${biggest.best?' · best. Pl. '+biggest.best:''}</em></div>`+
+   (eff?`<div class="ana-kpi grn"><small>Beste Klasse (Ø Platz, ab 2 Starter)</small><b title="${esc(eff.label)}">${esc(eff.label)}</b><em>Ø Platz ${eff.avg.toFixed(1).replace('.',',')} · ${eff.n} Starter</em></div>`:'');
+ }
+ O.innerHTML=st?((anaCh.matrix?anaMatrix(A,st):'')+(anaCh.grpSucc?anaSuccChart(st.G,st.lab,A.combined):'')):'';
+}
+function anaMatrix(A,st){
+ const hasPts=A.E.some(e=>e.total!=null);
+ const M={avg:{l:'Ø Platz (besser = oben)',get:r=>r.avg,high:false,f:v=>v.toFixed(1).replace('.',',')},pod:{l:'Podiumsquote (Top 3 je Starter)',get:r=>r.pod*100,high:true,f:v=>v.toFixed(0)+' %'},top10:{l:'Top-10-Quote',get:r=>r.top10*100,high:true,f:v=>v.toFixed(0)+' %'}};
+ if(hasPts) M.pts={l:'Ø Punktzahl',get:r=>r.pts,high:true,f:v=>v.toFixed(1).replace('.',',')};
+ const key=M[anaMxM]?anaMxM:'avg', m=M[key];
+ const R=st.rows.map(r=>({r,x:r.n,v:m.get(r)})).filter(d=>d.v!=null&&Number.isFinite(d.v));
+ const sel=`<div class="ana-mx-ctl noprint"><label>Klasse (Y-Achse):</label><select onchange="anaSetMx(this.value)">${Object.entries(M).map(([k,o])=>`<option value="${k}" ${k===key?'selected':''}>${o.l}</option>`).join('')}</select></div>`;
+ if(R.length<2) return `<div class="jchart"><p class="chart-title">Matrix Masse × Klasse</p><p class="chart-sub">Zu wenige ${esc(st.lab)}e mit Platzierungen.</p></div>`;
+ const W=600, H=420, L=52,Rr=18,T=16,B=44, pw=W-L-Rr, ph=H-T-B;
+ const xs=R.map(d=>d.x), xmx=Math.max(...xs), X1=Math.max(2,xmx)+.6, X0=0.4;
+ const sc=d=>m.high?d.v:-d.v, ss=R.map(sc), smn=Math.min(...ss), smx=Math.max(...ss), pad=(smx-smn||1)*.12, S0=smn-pad, S1=smx+pad;
+ const px=x=>L+(x-X0)/(X1-X0)*pw, py=s=>T+ph-(s-S0)/(S1-S0)*ph;
+ // Bezugslinien: mittlere Mannschaftsgröße, Gesamtniveau des Feldes
+ const xRef=xs.reduce((a,b)=>a+b,0)/xs.length;
+ const allR=st.rows.flatMap(r=>r.ranks), N=A.E.length;
+ const fieldVal={avg:allR.length?allR.reduce((a,b)=>a+b,0)/allR.length:null,pod:allR.length?allR.filter(x=>x<=3).length/N*100:0,top10:allR.length?allR.filter(x=>x<=10).length/N*100:0,pts:(()=>{const t=A.E.map(e=>e.total).filter(v=>v!=null);return t.length?t.reduce((a,b)=>a+b,0)/t.length:null})()}[key];
+ const sRef=fieldVal==null?(S0+S1)/2:(m.high?fieldVal:-fieldVal);
+ let svg=`<svg class="ana-mx" viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Matrix Masse und Klasse je ${esc(st.lab)}">`;
+ const qx=px(xRef), qy=py(sRef);
+ svg+=`<rect x="${L}" y="${T}" width="${qx-L}" height="${qy-T}" fill="#fef3c7" opacity=".55"/><rect x="${qx}" y="${T}" width="${W-Rr-qx}" height="${qy-T}" fill="#d1fae5" opacity=".6"/><rect x="${qx}" y="${qy}" width="${W-Rr-qx}" height="${T+ph-qy}" fill="#fee2e2" opacity=".7"/><rect x="${L}" y="${qy}" width="${qx-L}" height="${T+ph-qy}" fill="#f1f5f9" opacity=".8"/>`;
+ svg+=`<text class="q" x="${L+8}" y="${T+16}" fill="#b45309">★ Perlen</text><text class="q" x="${W-Rr-8}" y="${T+16}" text-anchor="end" fill="#047857">Top-Vereine</text><text class="q" x="${W-Rr-8}" y="${T+ph-8}" text-anchor="end" fill="#b91c1c">Massenstarter</text><text class="q" x="${L+8}" y="${T+ph-8}" fill="#64748b">klein &amp; unauffällig</text>`;
+ // Achsen
+ const xt=anaNiceStep(X1-X0,6); for(let t=Math.ceil(X0/xt)*xt;t<=X1;t+=xt){if(t<=0) continue; svg+=`<line x1="${px(t)}" x2="${px(t)}" y1="${T+ph}" y2="${T+ph+4}" stroke="#94a3b8"/><text x="${px(t)}" y="${T+ph+17}" text-anchor="middle">${+t.toFixed(1)}</text>`}
+ const yt=anaNiceStep(S1-S0,5); for(let t=Math.ceil(S0/yt)*yt;t<=S1;t+=yt){if(key==='avg'&&-t<1) continue; svg+=`<line x1="${L-4}" x2="${L}" y1="${py(t)}" y2="${py(t)}" stroke="#94a3b8"/><text x="${L-7}" y="${py(t)+4}" text-anchor="end">${m.f(m.high?t:-t)}</text>`}
+ svg+=`<line x1="${L}" x2="${L}" y1="${T}" y2="${T+ph}" stroke="#94a3b8"/><line x1="${L}" x2="${W-Rr}" y1="${T+ph}" y2="${T+ph}" stroke="#94a3b8"/><line x1="${qx}" x2="${qx}" y1="${T}" y2="${T+ph}" stroke="#64748b" stroke-dasharray="4 4"/><line x1="${L}" x2="${W-Rr}" y1="${qy}" y2="${qy}" stroke="#64748b" stroke-dasharray="4 4"/>`;
+ svg+=`<text x="${(L+W-Rr)/2}" y="${H-6}" text-anchor="middle" style="font-weight:700">Starter je ${esc(st.lab)} (Masse) →</text><text transform="rotate(-90 13 ${T+ph/2})" x="13" y="${T+ph/2}" text-anchor="middle" style="font-weight:700">${esc(m.l)} (Klasse) →</text>`;
+ // Punkte + Beschriftung ohne Überlappung
+ const pts=R.map(d=>{const cx=px(d.x), cy=py(sc(d)), top=d.x>=xRef&&sc(d)>=sRef, perl=d.x<xRef&&sc(d)>=sRef, mass=d.x>=xRef&&sc(d)<sRef; return {d,cx,cy,col:perl?'#d97706':top?'#059669':mass?'#dc2626':'#64748b'}});
+ pts.forEach(q=>{svg+=`<g><title>${esc(q.d.r.label+': '+q.d.r.n+' Starter · '+m.l+': '+m.f(q.d.v)+' · '+q.d.r.t3+'× Top 3'+(q.d.r.best?' · bester Platz '+q.d.r.best:''))}</title><circle cx="${q.cx}" cy="${q.cy}" r="${6+Math.min(6,q.d.r.t3*1.5)}" fill="${q.col}" fill-opacity=".85" stroke="#fff" stroke-width="2"/></g>`});
+ const placed=[]; [...pts].sort((a,b)=>a.cy-b.cy).forEach(q=>{const t=q.d.r.label.length>16?q.d.r.label.slice(0,15)+'…':q.d.r.label, w=t.length*6.1;
+   let side=q.cx+w+14>W-Rr?-1:1, x=side>0?q.cx+11:q.cx-11, y=q.cy+4, tries=0;
+   const hit=(x0,y0)=>placed.some(b=>Math.abs(b.y-y0)<12&&x0<b.x+b.w&&x0+w>b.x);
+   const x0f=()=>side>0?x:x-w; while(hit(x0f(),y)&&tries<6){y+=(tries%2?-1:1)*(12+tries*3); tries++}
+   placed.push({x:x0f(),y,w}); svg+=`<text x="${x}" y="${y}" text-anchor="${side>0?'start':'end'}" style="fill:#0b1f3a">${esc(t)}</text>`});
+ svg+='</svg>';
+ return `<div class="jchart"><p class="chart-title">Matrix: Masse × Klasse je ${esc(st.lab)}</p><p class="chart-sub">Jeder Punkt ist ein ${esc(st.lab)}. Waagerecht: wie viele Starter, senkrecht: wie gut (gestrichelt = Durchschnitt des Feldes). Größere Punkte = mehr Podiumsplätze.</p>${sel}${svg}</div>`;
+}
 // Teilnehmer und Erfolg je Verband/Verein: Balkenlänge = Starter, Farbe = erreichte Platzierung
 function anaSuccChart(G,lab,comb){
- const rows=[...G].map(([label,l])=>{const r=l.filter(e=>e.rank!=null).map(e=>e.rank), c=n=>r.filter(x=>x<=n).length;
+ const rows=[...G].map(([label,l])=>{const r=l.map(anaRk).filter(x=>x!=null), c=n=>r.filter(x=>x<=n).length;
    return {label,n:l.length,t3:c(3),t5:c(5)-c(3),t10:c(10)-c(5),rest:l.length-c(10),best:r.length?Math.min(...r):null,avg:r.length?r.reduce((a,b)=>a+b,0)/r.length:null,win:r.filter(x=>x===1).length}});
  if(!rows.length) return '';
- rows.sort((a,b)=>b.t3-a.t3||b.n-a.n||(a.avg||1e9)-(b.avg||1e9)); const R=rows.slice(0,14), mx=Math.max(...R.map(r=>r.n)), W=Math.min(900,Math.max(420,(window._fullW||640))), lw=130, rw=150, rh=26, top=8, pw=W-lw-rw-8, H=top+R.length*rh+6;
+ rows.sort((a,b)=>b.t3-a.t3||b.n-a.n||(a.avg||1e9)-(b.avg||1e9)); const R=rows.slice(0,14), mx=Math.max(...R.map(r=>r.n)), W=600, lw=118, rw=118, rh=26, top=8, pw=W-lw-rw-8, H=top+R.length*rh+6;
  const X=v=>v/mx*pw, col={t3:'#f59e0b',t5:'#0284c7',t10:'#7dd3fc',rest:'#cbd5e1'};
  let svg=`<svg style="font-size:12.5px" viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Teilnehmer und Erfolg je ${esc(lab)}">`;
  R.forEach((r,i)=>{const y=top+i*rh; let x=lw; svg+=`<g><title>${esc(r.label+': '+r.n+' Starter · '+(r.t3)+'× Top 3 · bester Platz '+(r.best||'–')+(r.avg!=null?' · Ø Platz '+r.avg.toFixed(1).replace('.',','):''))}</title><text x="${lw-6}" y="${y+16}" text-anchor="end">${esc(r.label.slice(0,20))}</text>`;
    [['t3'],['t5'],['t10'],['rest']].forEach(([k])=>{const w=X(r[k]); if(w>0){svg+=`<rect x="${x}" y="${y+3}" width="${w}" height="${rh-8}" fill="${col[k]}" rx="2"/>`; if(w>16&&r[k]) svg+=`<text x="${x+w/2}" y="${y+17}" text-anchor="middle" style="fill:${k==='rest'||k==='t10'?'#0b1f3a':'#fff'};font-weight:700;font-size:11px">${r[k]}</text>`; x+=w}});
-   svg+=`<text x="${x+6}" y="${y+17}" style="font-weight:700;font-size:13px">${r.n}</text><text x="${W-rw+34}" y="${y+17}" style="fill:#64748b;font-size:11px">${r.best?'best. Pl. '+r.best:''}${r.avg!=null?' · Ø '+r.avg.toFixed(1).replace('.',','):''}</text></g>`});
+   svg+=`<text x="${x+6}" y="${y+17}" style="font-weight:700;font-size:13px">${r.n}</text><text x="${W-rw+30}" y="${y+17}" style="fill:#64748b;font-size:12px">${r.avg!=null?'Ø '+r.avg.toFixed(1).replace('.',','):''}</text></g>`});
  svg+='</svg>';
  const leg='<div class="chart-legend"><span><i style="background:#f59e0b"></i>Top 3</span><span><i style="background:#0284c7"></i>Platz 4–5</span><span><i style="background:#7dd3fc"></i>Platz 6–10</span><span><i style="background:#cbd5e1"></i>weiter hinten / ohne Platz</span></div>';
- return `<div class="jchart" style="grid-column:1/-1"><p class="chart-title">Teilnehmer und Erfolg je ${esc(lab)}</p><p class="chart-sub">Länge = Anzahl Starter, Farbe = erreichte Platzierung. Sortiert nach Podiumsplätzen${comb?' (je Klasse gezählt)':''}. Lange Balken mit viel Gelb/Blau = viele Starter und erfolgreich.</p>${leg}${svg}</div>`;
+ return `<div class="jchart"><p class="chart-title">Teilnehmer und Erfolg je ${esc(lab)}</p><p class="chart-sub">Länge = Anzahl Starter, Farbe = erreichte Platzierung. Sortiert nach Podiumsplätzen${comb?' (je Klasse gezählt)':''}. Lange Balken mit viel Gelb/Blau = viele Starter und erfolgreich.</p>${leg}${svg}</div>`;
 }
 function anaPieCharts(A,marks,dbk){
  const out=[];
@@ -4618,14 +4692,13 @@ function anaPieCharts(A,marks,dbk){
    out.push(pieChart('Wertung','Gewertete Sportler und Ausfälle (DNS = nicht gestartet, DNF = aufgegeben, DSQ = disqualifiziert).',[...c].map(([label,v])=>({label,v})),'Sportler'));
  }
  const by=anaGrpBy(A);
- if((anaCh.pieCnt||anaCh.pieTop||anaCh.pieT3||anaCh.pieT5||anaCh.grpSucc)&&by!=='name'){
+ if((anaCh.pieCnt||anaCh.pieTop||anaCh.pieT3||anaCh.pieT5)&&by!=='name'){
    const lab=by==='nat'?'Verband':'Verein';
    const G=new Map(); A.E.forEach(e=>{const k=anaGKey(e,by,A.combined); if(k){if(!G.has(k)) G.set(k,[]); G.get(k).push(e)}});
    if(anaCh.pieCnt) out.push(pieChart('Anteil der Sportler je '+lab,'Wie viele der gestarteten Sportler kommen aus welcher '+lab+'?',[...G].map(([label,l])=>({label,v:l.length})),'Sportler'));
    const topPie=(n,t)=>pieChart('Anteil an den '+t,'Welche '+lab+' stellt wie viele Plätze unter den besten '+n+(A.combined?' (je Klasse)':'')+'?',[...G].map(([label,l])=>({label,v:l.filter(e=>e.rank!=null&&e.rank<=n).length})),'Plätze');
    if(anaCh.pieT3) out.push(topPie(3,'Podiumsplätzen (Top 3)'));
    if(anaCh.pieT5) out.push(topPie(5,'Top-5-Plätzen'));
-   if(anaCh.grpSucc) out.push(anaSuccChart(G,lab,A.combined));
    if(anaCh.pieTop) out.push(pieChart('Anteil an den Top-10-Plätzen','Welche '+lab+' stellt wie viele Plätze unter den besten 10'+(A.combined?' (je Klasse)':'')+'?',[...G].map(([label,l])=>({label,v:l.filter(e=>e.rank!=null&&e.rank<=10).length})),'Plätze'));
  }
  return out.filter(Boolean).join('');
@@ -5035,6 +5108,7 @@ function anaRenderCharts(){
  $('anaPctSeg').innerHTML=`<button type="button" class="${anaPct?'':'on'}" onclick="anaSetPct(false)">Werte</button><button type="button" class="${anaPct?'on':''}" onclick="anaSetPct(true)">in %</button>`;
  $('anaPies').innerHTML=anaPieCharts(A,anaMarks(),anaDbKeys()); $('anaDash').classList.toggle('nopie',!$('anaPies').innerHTML.trim());
  { const L=$('anaLeft'), w0=L.clientWidth||720, two=w0>=860; L.classList.toggle('two',two); window._colW=Math.max(360,Math.round((two?(w0-16)/2:w0)-46)); window._fullW=Math.min(900,Math.max(420,w0-46)); }
+ try{anaDashboard(A)}catch(e){console.warn(e)}
  $('anaGroups').innerHTML=anaGroupCharts(A,anaMarks(),anaDbKeys());
  $('anaSpeedX').innerHTML=anaSpeedCharts(A,anaMarks(),anaDbKeys());
  $('anaChartParamWrap').style.display=(anaCh.main&&!A.combined)?'':'none';
@@ -5620,10 +5694,12 @@ function trLines(cats,series,o){
  for(let t=lo;t<=hi+1e-9;t+=step) s+=`<line x1="${lw}" x2="${W-rw}" y1="${py(t)}" y2="${py(t)}" stroke="#e5ebf3"/><text x="${lw-7}" y="${py(t)+4}" text-anchor="end">${fmt(t)}</text>`;
  if(o.yt) s+=`<text x="11" y="${(top+H-bt)/2}" text-anchor="middle" transform="rotate(-90 11 ${(top+H-bt)/2})" style="font-size:11px">${esc(o.yt)}</text>`;
  (o.bandY||[]).forEach(b=>{const y1=py(Math.min(hi,b.to)), y2=py(Math.max(lo,b.from)); s+=`<rect x="${lw}" y="${y1}" width="${W-lw-rw}" height="${Math.max(0,y2-y1)}" fill="${b.color}" fill-opacity=".10"/><text x="${W-rw-4}" y="${y1+12}" text-anchor="end" style="font-size:10.5px;fill:${b.color};font-weight:700">${esc(b.label)}</text>`});
- series.forEach(sr=>{let d='',pen=false,last=null; sr.vals.forEach((v,i)=>{if(v==null){pen=false;return} d+=(pen?'L':'M')+cx(i).toFixed(1)+' '+py(v).toFixed(1)+' '; pen=true; last=i});
+ const anyHlL=series.some(q=>q.hl);
+ [...series].sort((a,b)=>(a.hl?1:0)-(b.hl?1:0)).forEach(sr=>{const dimL=anyHlL&&!sr.hl; if(dimL){sr=Object.assign({},sr,{color:'#b6c2d1',w:1.6})} else if(sr.hl){sr=Object.assign({},sr,{w:4.4})}
+   let d='',pen=false,last=null; sr.vals.forEach((v,i)=>{if(v==null){pen=false;return} d+=(pen?'L':'M')+cx(i).toFixed(1)+' '+py(v).toFixed(1)+' '; pen=true; last=i});
    s+=`<path d="${d}" fill="none" stroke="${sr.color}" stroke-width="${sr.w||2.4}" ${sr.dash?`stroke-dasharray="${sr.dash}"`:''} stroke-linejoin="round" stroke-linecap="round"/>`;
    if(!o.nodots) sr.vals.forEach((v,i)=>{if(v!=null) s+=`<circle cx="${cx(i)}" cy="${py(v)}" r="3" fill="${sr.color}" stroke="#fff" stroke-width="1.2"><title>${esc(sr.name+' · '+cats[i]+': '+fmt(v)+(o.unit?' '+o.unit:''))}</title></circle>`});
-   if(o.endLbl&&last!=null) s+=`<text x="${cx(last)+7}" y="${py(sr.vals[last])+4}" style="font-size:11px;font-weight:700;fill:${sr.color}">${esc(String(sr.name).slice(0,16))}</text>`;
+   if((o.endLbl||sr.hl)&&last!=null) s+=`<text x="${cx(last)+7}" y="${py(sr.vals[last])+4}" style="font-size:11px;font-weight:700;fill:${sr.color}">${esc(String(sr.name).slice(0,16))}</text>`;
  });
  s=trXLabels(s,cats,cx,H-bt+16,o.maxLbl);
  return s+'</svg>';
@@ -5641,7 +5717,8 @@ function trScatter(pts,o){
  for(let t=x0;t<=x1+1e-9;t+=sx) s+=`<line x1="${px(t)}" x2="${px(t)}" y1="${top}" y2="${H-bt}" stroke="#eef2f8"/><text x="${px(t)}" y="${H-bt+16}" text-anchor="middle">${String(+t.toFixed(2)).replace('.',',')}</text>`;
  s+=`<text x="${(lw+W-rw)/2}" y="${H-6}" text-anchor="middle" style="font-size:11.5px">${esc(o.xl||'')}</text><text x="12" y="${(top+H-bt)/2}" text-anchor="middle" transform="rotate(-90 12 ${(top+H-bt)/2})" style="font-size:11.5px">${esc(o.yl||'')}</text>`;
  if(o.line) s+=`<line x1="${px(x0)}" x2="${px(x1)}" y1="${py(o.line.a+o.line.b*x0)}" y2="${py(o.line.a+o.line.b*x1)}" stroke="#0f172a" stroke-width="1.8" stroke-dasharray="6 4" opacity=".7"/>`;
- pts.forEach(p=>{s+=`<circle cx="${px(p.x)}" cy="${py(p.y)}" r="5" fill="${p.c||'#0284c7'}" fill-opacity=".82" stroke="#fff" stroke-width="1.4"><title>${esc(p.t||'')}</title></circle>`});
+ const anyHlS=pts.some(p=>p.hl);
+ [...pts].sort((a,b)=>(a.hl?1:0)-(b.hl?1:0)).forEach(p=>{const hl=p.hl, dm=anyHlS&&!hl; s+=`<circle cx="${px(p.x)}" cy="${py(p.y)}" r="${hl?7.5:5}" fill="${dm?'#b6c2d1':(hl?'#d97706':(p.c||'#0284c7'))}" fill-opacity="${dm?.6:.9}" stroke="${hl?'#0f172a':'#fff'}" stroke-width="${hl?2:1.4}"><title>${esc(p.t||'')}</title></circle>`});
  return s+'</svg>';
 }
 function trRegress(pts){
@@ -5668,11 +5745,11 @@ function trDiff(items,o){
  let s=trSvg(W,H,o.label);
  for(let t=y0;t<=y1+1e-9;t+=step){const z=Math.abs(t)<1e-9; s+=`<line x1="${lw}" x2="${W-rw}" y1="${py(t)}" y2="${py(t)}" stroke="${z?'#334155':'#e5ebf3'}" stroke-width="${z?1.5:1}"/><text x="${lw-8}" y="${py(t)+4}" text-anchor="end">${z?'0':String(+t.toFixed(2)).replace('.',',')}</text>`}
  s+=`<text x="12" y="${(top+H-bt)/2}" text-anchor="middle" transform="rotate(-90 12 ${(top+H-bt)/2})" style="font-size:11px">${esc(o.yl||'')}</text>`;
- items.forEach((p,i)=>{const d=p.d, cx=lw+slot*(i+.5), yy=py(Math.max(d,0)), hh=Math.max(2,Math.abs(py(d)-py(0))), col=d>=0?'#16a34a':'#f59e0b';
-   s+=`<g><title>${esc(p.tip||'')}</title><rect x="${cx-bwd/2}" y="${yy}" width="${bwd}" height="${hh}" fill="${col}" rx="2"/>`;
+ items.forEach((p,i)=>{const d=p.d, cx=lw+slot*(i+.5), yy=py(Math.max(d,0)), hh=Math.max(2,Math.abs(py(d)-py(0))), col=d>=0?'#16a34a':'#f59e0b', dimD=items.some(q=>q.hl)&&!p.hl;
+   s+=`<g${dimD?' opacity=".4"':''}><title>${esc(p.tip||'')}</title><rect x="${cx-bwd/2}" y="${yy}" width="${bwd}" height="${hh}" fill="${col}" rx="2"${p.hl?' stroke="#0f172a" stroke-width="2.5"':''}/>`;
    const ty=d>=0?yy-5:yy+hh+5;
    s+=many?`<text x="${cx}" y="${ty}" text-anchor="${d>=0?'start':'end'}" transform="rotate(-90 ${cx} ${ty})" style="font-size:10.5px;font-weight:700">${trSg(d,dec)}</text>`:`<text x="${cx}" y="${d>=0?yy-6:yy+hh+14}" text-anchor="middle" style="font-weight:700">${trSg(d,dec)}</text>`;
-   const ly=H-bt+16, nm=esc(p.label.slice(0,24));
+   const ly=H-bt+16, nm=(p.hl?'★ ':'')+esc(p.label.slice(0,24));
    s+=rot?`<text x="${cx+4}" y="${ly}" text-anchor="end" transform="rotate(-38 ${cx+4} ${ly})">${nm}</text>`:`<text x="${cx}" y="${ly}" text-anchor="middle">${nm}</text>`;
    s+='</g>'});
  return s+'</svg>';
@@ -5686,12 +5763,14 @@ function trDots(groups,o){
  const x0=Math.floor((lo-step*.3)/step)*step, x1=Math.ceil((hi+step*.3)/step)*step, px=v=>lw+(v-x0)/(x1-x0)*(W-lw-vw);
  const mAll=trAvg(all); let mTop=null,topTxt='';
  if(groups.length>=5){mTop=trAvg(groups.slice(0,5).map(g=>g.m)); topTxt='Ø Top 5 Sportler'} else if(all.length>=5){mTop=trAvg([...all].sort((a,b)=>b-a).slice(0,5)); topTxt='Ø 5 beste Sprünge'}
+ const anyHl=groups.some(g=>g.hl);
  let s=trSvg(W,H,o.label);
  for(let t=Math.ceil(x0/step)*step;t<=x1+1e-9;t+=step) s+=`<line x1="${px(t)}" x2="${px(t)}" y1="${top-8}" y2="${H-24}" stroke="#e5ebf3"/><text x="${px(t)}" y="${H-8}" text-anchor="middle">${String(+t.toFixed(2)).replace('.',',')}</text>`;
  groups.forEach((g,i)=>{const y=top+i*rowH, cy=y+rowH/2+1, sv=[...g.vals];
-   s+=`<g><rect x="0" y="${y}" width="${W}" height="${rowH}" fill="${i%2?'transparent':'#f8fafc'}"/><text x="${lw-8}" y="${cy+4}" text-anchor="end" style="font-weight:700;fill:#0b1f3a">${esc((i+1)+'. '+g.name.slice(0,26))}</text>`;
+   const hl=!!g.hl, dim=anyHl&&!hl;
+   s+=`<g${dim?' opacity=".45"':''}><rect x="0" y="${y}" width="${W}" height="${rowH}" fill="${hl?'#fef3c7':(i%2?'transparent':'#f8fafc')}"/><text x="${lw-8}" y="${cy+4}" text-anchor="end" style="font-weight:${hl?900:700};fill:${hl?'#92400e':'#0b1f3a'}">${hl?'★ ':''}${esc((i+1)+'. '+g.name.slice(0,26))}</text>`;
    if(sv.length>1) s+=`<line x1="${px(Math.min(...sv))}" x2="${px(Math.max(...sv))}" y1="${cy}" y2="${cy}" stroke="#cbd5e1" stroke-width="3"/>`;
-   g.vals.forEach((v,k)=>{s+=`<circle cx="${px(v)}" cy="${cy}" r="${v===g.max?5.5:4}" fill="${v===g.max?'#10b981':(o.color||'#0284c7')}" stroke="#fff" stroke-width="1.4"><title>${esc(g.name+': '+trF(v,dec)+' '+(o.unit||'')+' ('+(k+1)+'. Sprung)')}</title></circle>`});
+   g.vals.forEach((v,k)=>{s+=`<circle cx="${px(v)}" cy="${cy}" r="${(g.hl?1.3:1)*(v===g.max?5.5:4)}" fill="${v===g.max?'#10b981':(g.hl?'#d97706':(o.color||'#0284c7'))}" stroke="${g.hl?'#0f172a':'#fff'}" stroke-width="${g.hl?1.8:1.4}"><title>${esc(g.name+': '+trF(v,dec)+' '+(o.unit||'')+' ('+(k+1)+'. Sprung)')}</title></circle>`});
    if(sv.length>1) s+=`<rect x="${px(g.m)-1}" y="${cy-8}" width="2" height="16" fill="#0f172a"/>`;
    s+=`<text x="${W-vw+12}" y="${cy+4}" style="fill:#0b1f3a">${esc((sv.length>1?'Ø '+trF(g.m,dec)+' · max '+trF(g.max,dec)+' · '+sv.length+' Sprünge':trF(g.m,dec)+' '+(o.unit||'')))}</text></g>`});
  const vline=(v,c,dash,lab,right)=>`<line x1="${px(v)}" x2="${px(v)}" y1="${top-10}" y2="${H-24}" stroke="${c}" stroke-width="2" stroke-dasharray="${dash}"/><text x="${px(v)+(right?5:-5)}" y="${top-14}" text-anchor="${right?'start':'end'}" style="font-size:11px;font-weight:700;fill:${c}">${esc(lab)}</text>`;
@@ -5762,7 +5841,7 @@ function trjLibRender(){
  const L=Object.values(lib).sort((a,b)=>trjTs(a.id)-trjTs(b.id));
  el.innerHTML=L.map(t=>{const cur=t.id===(trj&&trj.id), nm=cur?trjLibName(trj):trjLibName(t);
    return `<div class="trj-tab${cur?' cur':''}" role="tab" aria-selected="${cur}" ${cur?'ondblclick="document.getElementById(\'trj_title\').focus()"':`onclick="trjOpen('${t.id}')"`} title="${cur?'Doppelklick: Bezeichnung bearbeiten':'Öffnen'}"><span>${esc(nm)}</span><button type="button" class="x" title="Einheit löschen" onclick="event.stopPropagation();trjLibDel('${t.id}')">×</button></div>`}).join('');
- const c=el.querySelector('.trj-tab.cur'); if(c&&c.scrollIntoView) try{c.scrollIntoView({block:'nearest',inline:'nearest'})}catch(e){}
+ const c=el.querySelector('.trj-tab.cur'); if(c) try{const l=c.offsetLeft, r=l+c.offsetWidth; if(l<el.scrollLeft) el.scrollLeft=l-8; else if(r>el.scrollLeft+el.clientWidth) el.scrollLeft=r-el.clientWidth+8}catch(e){}
 }
 function trjOpen(id){
  const t=trjLibGet()[id]; if(!t) return;
@@ -5825,6 +5904,39 @@ function trjCsv(){
  S.rows.forEach(r=>{c+=[r.name,r.n,r.gate==null?'':r.gate,r.speed==null?'':String(r.speed).replace('.',','),r.dist==null?'':String(r.dist).replace('.',','),r.land].map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(';')+'\n'});
  download(c,'sprungtraining.csv');
 }
+function trjBase(){const m=trj.meta||{}; return 'Sprungtraining'+(m.date?'_'+m.date:'')+(m.title?'_'+String(m.title).replace(/[^\wäöüÄÖÜß-]+/g,'_'):'')}
+function trjRowsExport(){
+ const S=trjStats(), AD=trjAdj(S,'speed'), ADd=trjAdj(S,'dist'), m=trj.meta||{};
+ const head=['Name','Sprung','Gate','Speed (km/h)'].concat(AD.on?['Speed komp. (Gate '+AD.gRef+')']:[]).concat(['Weite (m)']).concat(ADd.on?['Weite komp. (Gate '+ADd.gRef+')']:[]).concat(['Landung']);
+ const rows=S.rows.map(r=>[r.name,r.n,r.gate==null?'':r.gate,r.speed==null?'':r.speed].concat(AD.on?[r.speed==null?'':+AD.val(r).toFixed(2)]:[]).concat([r.dist==null?'':r.dist]).concat(ADd.on?[r.dist==null?'':+ADd.val(r).toFixed(2)]:[]).concat([r.land]));
+ const info=[['Einheit',m.title||''],['Datum',m.date?trjDateTxt(m.date):''],['Ort',m.place||''],['Schanze',m.hill||''],['K-Punkt',m.k||''],['Gate (global)',m.gate==null?'':m.gate],['Notiz',m.note||''],['Gates kompensiert',AD.on?'ja – Bezugsgate '+AD.gRef+' ('+AD.info+')':'nein']];
+ return {head,rows,info,S};
+}
+function trjExportDlg(){
+ if(!trj.ath.length){toast('Noch keine Sportler in dieser Einheit.'); return}
+ const d=document.createElement('div'); d.className='modal-root open'; d.innerHTML='<div class="modal-box" style="max-width:430px"><h3 style="margin:0 0 8px">Einheit exportieren</h3><p style="margin:0 0 12px;font-size:14px">Wie soll die Einheit „'+esc(trjLibName(trj))+'“ gespeichert werden?</p><div style="display:flex;flex-direction:column;gap:8px"><button type="button" id="trx1">Excel (.xlsx) – Sprünge, Sportler, Einheit</button><button type="button" id="trx2" class="secondary">CSV (Sprungliste)</button><button type="button" id="trx3" class="secondary">Einheit-Datei (.json) – zum späteren Importieren</button><button type="button" id="trx0" class="secondary">Abbrechen</button></div></div>';
+ document.body.appendChild(d); const close=()=>d.remove();
+ d.querySelector('#trx0').onclick=close; d.querySelector('#trx1').onclick=()=>{trjExport('xlsx'); close()}; d.querySelector('#trx2').onclick=()=>{trjExport('csv'); close()}; d.querySelector('#trx3').onclick=()=>{trjExport('json'); close()};
+}
+function trjExport(fmt){
+ const X=trjRowsExport(), base=trjBase();
+ if(fmt==='json'){download(JSON.stringify({nordiclab:'sprungtraining',version:1,exported:new Date().toISOString(),unit:Object.assign({},JSON.parse(JSON.stringify(trj)))},null,1),base+'.json'); toast('Einheit-Datei gespeichert.'); return}
+ if(fmt==='xlsx'&&typeof XLSX!=='undefined'){
+   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([X.head,...X.rows]),'Sprünge');
+   const A=X.S.ath, sh=[['Sportler','Sprünge','Ø Speed','Max Speed','Ø Weite','Max Weite','Telemark %']].concat(A.map(a=>[a.name,a.jumps.length,a.avgS==null?'':+a.avgS.toFixed(2),a.maxS==null?'':a.maxS,a.avgD==null?'':+a.avgD.toFixed(2),a.maxD==null?'':a.maxD,a.tele==null?'':Math.round(a.tele)]));
+   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sh),'Sportler'); XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(X.info),'Einheit');
+   XLSX.writeFile(wb,base+'.xlsx'); toast('Excel-Datei gespeichert.'); return;
+ }
+ download([X.head,...X.rows].map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""').replace(/^(\d+)\.(\d+)$/,'$1,$2')}"`).join(';')).join('\n')+'\n',base+'.csv');
+ toast(fmt==='xlsx'?'Excel ist offline nicht verfügbar – CSV gespeichert (öffnet sich in Excel).':'CSV gespeichert.');
+}
+async function trjImportFile(files){
+ const f=files&&files[0]; if(!f) return;
+ try{const o=JSON.parse(await f.text()), u=o&&o.unit; if(!u||!Array.isArray(u.ath)) throw 0;
+   trjSave(); const c=JSON.parse(JSON.stringify(u)); c.id=trjNewId(); delete c.upd;
+   try{localStorage.setItem(TRJ_KEY,JSON.stringify(c))}catch(e){} trjLoad(); trjSave(); trjRenderAll(); toast('Einheit „'+trjLibName(trj)+'“ importiert (als neue Einheit in der Arbeitsmappe).');
+ }catch(e){toast('Die Datei ist keine NordicLab-Einheit.')}
+}
 function trjPrintAll(){trPrint(['trjSetCard','trjKpiCard','trjSpeedCard','trjWeiteCard','trjLandCard','trjTabCard'])}
 function trjStats(){
  const rows=[], ath=[];
@@ -5841,6 +5953,12 @@ function trjStats(){
 }
 
 // ---- Luken (Gates) ausgleichen: Speed je Gate (fest oder aus den Daten), Weite über den Speed×Weite-Trend ----
+let trjHL=new Set(); try{trjHL=new Set(JSON.parse(localStorage.getItem('nk_trjhl')||'[]'))}catch(e){}
+function trjToggleHL(k){if(k==null) trjHL.clear(); else if(trjHL.has(k)) trjHL.delete(k); else trjHL.add(k); try{localStorage.setItem('nk_trjhl',JSON.stringify([...trjHL]))}catch(e){} trjRenderAnalysis()}
+function trjHlBar(){
+ const names=trj.ath.filter(a=>a.name).map(a=>({k:trjKey(a.name),n:a.name})); if(names.length<2) return '';
+ return `<div class="trj-hl noprint"><b>Sportler hervorheben:</b> ${names.map(q=>`<button type="button" class="chip${trjHL.has(q.k)?' on':''}" data-k="${esc(q.k)}" onclick="trjToggleHL(this.dataset.k)">${trjHL.has(q.k)?'★ ':''}${esc(q.n)}</button>`).join('')}${trjHL.size?`<button type="button" class="chip" onclick="trjToggleHL(null)">✕ keine</button>`:''}</div>`;
+}
 let trjGC={adj:true,mode:'fix',kmh:0.4,wm:'k',mfix:2.75};
 try{Object.assign(trjGC,JSON.parse(localStorage.getItem('nk_trjgc')||'{}'))}catch(e){}
 function trjSetGC(k,v){
@@ -5889,14 +6007,15 @@ function trjGCCtl(AD,key){
 const trjKp=()=>{const k=trjNum(trj.meta&&trj.meta.k); return k!=null&&k>0?k:null};
 
 // Speed/Weite nach Luke (Gate): Box = mittlere 50 %, Strich = Median, Linie = Min–Max, Punkt = Sprung
-function trjGateChart(rows,key,label,unit,dec,color){
+function trjGateChart(rows,key,label,unit,dec,color,suffix){
+ suffix=suffix||'';
  const P=rows.filter(r=>r[key]!=null&&r.gate!=null); if(!P.length) return '';
  const gates=[...new Set(P.map(r=>r.gate))].sort((a,b)=>a-b);
  const W=900,lw=150,rw=30,rowH=62,top=14,H=top+gates.length*rowH+30;
  const kp=key==='dist'?trjKp():null, vals=P.map(r=>r[key]).concat(kp!=null?[kp]:[]), lo=Math.min(...vals), hi=Math.max(...vals), step=anaNiceStep((hi-lo)||1,7);
  const x0=Math.floor((lo-step*.3)/step)*step, x1=Math.ceil((hi+step*.3)/step)*step, px=v=>lw+(v-x0)/((x1-x0)||1)*(W-lw-rw);
  const q=(a,p)=>{const i=(a.length-1)*p, l=Math.floor(i), h=Math.ceil(i); return a[l]+(a[h]-a[l])*(i-l)};
- let s=trSvg(W,H,label+' nach Luke');
+ let s=trSvg(W,H,label+' nach Luke'+suffix);
  for(let t=Math.ceil(x0/step)*step;t<=x1+1e-9;t+=step) s+=`<line x1="${px(t)}" x2="${px(t)}" y1="${top-4}" y2="${H-24}" stroke="#e5ebf3"/><text x="${px(t)}" y="${H-8}" text-anchor="middle">${String(+t.toFixed(2)).replace('.',',')}</text>`;
  gates.forEach((g,i)=>{
    const pp=P.filter(r=>r.gate===g), vs=pp.map(r=>r[key]).sort((a,b)=>a-b), cy=top+i*rowH+rowH/2, c=ANA_GCOL[i%ANA_GCOL.length];
@@ -5904,11 +6023,11 @@ function trjGateChart(rows,key,label,unit,dec,color){
    s+=`<text x="${lw-12}" y="${cy-2}" text-anchor="end" style="font-weight:800;fill:#0b1f3a">Luke ${trF(g,0)}</text><text x="${lw-12}" y="${cy+13}" text-anchor="end" style="font-size:11px;fill:#64748b">${vs.length} Sprünge · Ø ${trF(trAvg(vs),dec)}</text>`;
    s+=`<line x1="${px(vs[0])}" x2="${px(vs[vs.length-1])}" y1="${cy}" y2="${cy}" stroke="${c}" stroke-width="2"/><line x1="${px(vs[0])}" x2="${px(vs[0])}" y1="${cy-7}" y2="${cy+7}" stroke="${c}" stroke-width="2"/><line x1="${px(vs[vs.length-1])}" x2="${px(vs[vs.length-1])}" y1="${cy-7}" y2="${cy+7}" stroke="${c}" stroke-width="2"/>`;
    s+=`<rect x="${px(q1)}" y="${cy-12}" width="${Math.max(2,px(q3)-px(q1))}" height="24" rx="4" fill="${c}" fill-opacity=".22" stroke="${c}" stroke-width="2"/><line x1="${px(md)}" x2="${px(md)}" y1="${cy-12}" y2="${cy+12}" stroke="${c}" stroke-width="3"/>`;
-   [...pp].sort((a,b)=>a[key]-b[key]).forEach((r,j)=>{const dy=((j*7)%5-2)*4.5;
-     s+=`<circle cx="${px(r[key])}" cy="${cy+dy}" r="3.4" fill="${c}" fill-opacity=".8" stroke="#fff" stroke-width="1"><title>${esc(r.name+': '+trF(r[key],dec)+' '+unit+' · Luke '+trF(g,0)+' · '+r.n+'. Sprung')}</title></circle>`});
+   [...pp].sort((a,b)=>(trjHL.has(trjKey(a.name))?1:0)-(trjHL.has(trjKey(b.name))?1:0)||a[key]-b[key]).forEach((r,j)=>{const dy=((j*7)%5-2)*4.5, hl=trjHL.has(trjKey(r.name)), dm=trjHL.size>0&&!hl;
+     s+=`<circle cx="${px(r[key])}" cy="${cy+dy}" r="${hl?6:3.4}" fill="${hl?'#d97706':c}" fill-opacity="${dm?.35:.85}" stroke="${hl?'#0f172a':'#fff'}" stroke-width="${hl?2:1}"><title>${esc(r.name+': '+trF(r[key],dec)+' '+unit+' · Luke '+trF(g,0)+' · '+r.n+'. Sprung')}</title></circle>`});
  });
  if(kp!=null) s+=`<line x1="${px(kp)}" x2="${px(kp)}" y1="${top-4}" y2="${H-24}" stroke="#dc2626" stroke-width="2.2"/><text x="${px(kp)+5}" y="${top+6}" style="font-size:11px;font-weight:700;fill:#dc2626">K-Punkt ${trF(kp,0)} m</text>`;
- return trBox(label+' nach Luke','Jeder Punkt ist ein Sprung. Box = mittlere 50 %, dicker Strich = Median, Linie = kleinster bis größter Wert.'+(gates.length<2?' Es gibt bisher nur eine Luke – für den Vergleich Sprünge mit verschiedenen Luken eintragen.':' So siehst du, wie stark die Luke '+label+' bestimmt.')+(kp!=null?' Rote Linie = K-Punkt.':''),s+'</svg>',kp!=null?`<span><i style="background:#dc2626;height:3px;border-radius:0;width:16px"></i>K-Punkt</span>`:'');
+ return trBox(label+' nach Luke'+suffix,'Jeder Punkt ist ein Sprung. Box = mittlere 50 %, dicker Strich = Median, Linie = kleinster bis größter Wert.'+(gates.length<2?' Es gibt bisher nur eine Luke – für den Vergleich Sprünge mit verschiedenen Luken eintragen.':' So siehst du, wie stark die Luke '+label+' bestimmt.')+(kp!=null?' Rote Linie = K-Punkt.':''),s+'</svg>',kp!=null?`<span><i style="background:#dc2626;height:3px;border-radius:0;width:16px"></i>K-Punkt</span>`:'');
 }
 function trjCountTxt(){const S=trjStats(); return trj.ath.length+' Sportler · '+S.rows.length+' Sprünge'}
 function trjRenderEdit(){
@@ -5954,33 +6073,42 @@ function trjRenderAnalysis(){
  // Kennzahlen
  if(!S.rows.length){
    $('trjSumTab').innerHTML=emp('Noch keine Sprünge erfasst – oben in der Tabelle Speed, Weite und Landung eintragen.');
+   $('trjSpeedBar').innerHTML=''; $('trjWeiteBar').innerHTML='';
    ['trjSpeedCharts','trjWeiteCharts','trjLandCharts','trjTabs'].forEach(id=>$(id).innerHTML=emp('Sobald Sprünge erfasst sind, erscheinen hier die Auswertungen.'));
    return;
  }
-  // Sportler-Tabelle
+  // Gates kompensieren (gilt für alle Speed-Auswertungen)
+ const ADs=trjAdj(S,'speed');
+ if(ADs.on) A.forEach(a=>{const v=a.jumps.filter(j=>j.speed!=null).map(j=>ADs.val(j)); a.avgS=v.length?trAvg(v):null; a.maxS=v.length?Math.max(...v):null});
+ // Sportler-Tabelle
  const rk=(arr,key)=>{const s=[...arr].filter(a=>a[key]!=null).sort((a,b)=>b[key]-a[key]); const m=new Map(); s.forEach((a,i)=>m.set(a.key,i+1)); return m};
  const rS=rk(A,'avgS'), rD=rk(A,'avgD'), bS=Math.max(...A.map(a=>a.avgS==null?-1:a.avgS)), bD=Math.max(...A.map(a=>a.avgD==null?-1:a.avgD)), mS=Math.max(...A.map(a=>a.maxS==null?-1:a.maxS)), mD=Math.max(...A.map(a=>a.maxD==null?-1:a.maxD));
  const cell=(v,d,best)=>v==null?'–':(best&&A.length>1?{v:trF(v,d),best:true}:trF(v,d));
  const order=[...A].sort((a,b)=>(b.avgD??-1)-(a.avgD??-1)||(b.avgS??-1)-(a.avgS??-1));
- $('trjSumTab').innerHTML=trTable(['Sportler','Sprünge','Ø Speed','Rang','Max Speed','Ø Weite','Rang','Max Weite','Tele'],order.map(a=>[a.name,a.jumps.length,cell(a.avgS,1,a.avgS===bS),rS.get(a.key)||'–',cell(a.maxS,1,a.maxS===mS),cell(a.avgD,1,a.avgD===bD),rD.get(a.key)||'–',cell(a.maxD,1,a.maxD===mD),a.tele==null?'–':trF(a.tele,0)+' %']),{num:[1,2,3,4,5,6,7,8]})+'<p class="tr-note">Sortiert nach Ø Weite. Grün = bester Wert der Gruppe. Rang = Platz beim jeweiligen Ø (Speed bzw. Weite).</p>';
+ $('trjSumTab').innerHTML=trTable(['Sportler','Sprünge','Ø Speed'+(ADs.on?' *':''),'Rang','Max Speed'+(ADs.on?' *':''),'Ø Weite','Rang','Max Weite','Tele'],order.map(a=>[a.name,a.jumps.length,cell(a.avgS,1,a.avgS===bS),rS.get(a.key)||'–',cell(a.maxS,1,a.maxS===mS),cell(a.avgD,1,a.avgD===bD),rD.get(a.key)||'–',cell(a.maxD,1,a.maxD===mD),a.tele==null?'–':trF(a.tele,0)+' %']),{num:[1,2,3,4,5,6,7,8]})+'<p class="tr-note">Sortiert nach Ø Weite. Grün = bester Wert der Gruppe. Rang = Platz beim jeweiligen Ø (Speed bzw. Weite).'+(ADs.on?' * Speed auf Gate '+ADs.gRef+' umgerechnet (Gates kompensiert).':'')+'</p>';
  // Diagramme je Messgröße
+ const barHtml=trjHlBar();
+ $('trjSpeedBar').innerHTML=(ADs.multi?'<div class="trj-gcbar">'+trjGCCtl(ADs,'speed')+'<span class="tr-note" style="margin-left:8px">gilt für alle Speed-Diagramme</span></div>':'')+barHtml; $('trjWeiteBar').innerHTML=barHtml;
  const charts=(key,label,unit,dec,color)=>{
-   const G=A.filter(a=>a[key==='speed'?'sp':'di'].length).map(a=>({name:a.name,vals:a[key==='speed'?'sp':'di']}));
+   const fldK=key==='speed'?'speed':'dist', ADk=key==='speed'?ADs:null, cmp=!!(ADk&&ADk.on);
+   const G=A.filter(a=>a[key==='speed'?'sp':'di'].length).map(a=>({name:a.name,hl:trjHL.has(a.key),vals:cmp?a.jumps.filter(j=>j.speed!=null).map(j=>ADk.val(j)):a[key==='speed'?'sp':'di']}));
    if(!G.length) return emp('Keine '+label+'-Werte erfasst.');
    let out='';
+   const cmpTxt=cmp?' (Gates kompensiert, Bezugsgate '+ADk.gRef+')':'';
    const d=trDots(G.map(g=>({...g})),{unit,dec,color,label:label+' gesamt',kp:key==='dist'?trjKp():null});
-   out+=trBox(label+' gesamt','Alle Sportler nach Ø '+label+' sortiert. Jeder Punkt ist ein Sprung (grün = bester Sprung), der dunkle Strich der Mittelwert. Gestrichelt: Ø gesamt'+(d.mTop!=null?' und '+d.topTxt:'')+'.'+(d.kp!=null?' Rote Linie = K-Punkt.':''),d.svg,trLeg([[color,'Sprung',1],['#10b981','Bester Sprung',1]])+`<span><i style="background:none;border-top:2px dashed #475569;height:0;width:16px;border-radius:0"></i>Ø gesamt</span>`+(d.mTop!=null?`<span><i style="background:none;border-top:2px dotted #dc2626;height:0;width:16px;border-radius:0"></i>${esc(d.topTxt)}</span>`:'')+(d.kp!=null?`<span><i style="background:#dc2626;height:3px;border-radius:0;width:16px"></i>K-Punkt</span>`:''));
-   out+=trjGateChart(S.rows,key==='speed'?'speed':'dist',label,unit,dec,color);
+   out+=trBox(label+' gesamt'+cmpTxt,'Alle Sportler nach Ø '+label+' sortiert. Jeder Punkt ist ein Sprung (grün = bester Sprung), der dunkle Strich der Mittelwert. Gestrichelt: Ø gesamt'+(d.mTop!=null?' und '+d.topTxt:'')+'.'+(d.kp!=null?' Rote Linie = K-Punkt.':''),d.svg,trLeg([[color,'Sprung',1],['#10b981','Bester Sprung',1]])+`<span><i style="background:none;border-top:2px dashed #475569;height:0;width:16px;border-radius:0"></i>Ø gesamt</span>`+(d.mTop!=null?`<span><i style="background:none;border-top:2px dotted #dc2626;height:0;width:16px;border-radius:0"></i>${esc(d.topTxt)}</span>`:'')+(d.kp!=null?`<span><i style="background:#dc2626;height:3px;border-radius:0;width:16px"></i>K-Punkt</span>`:''));
+   out+=trjGateChart(S.rows,key==='speed'?'speed':'dist',label,unit,dec,color,cmp?' (Rohwerte)':'');
+   if(cmp) out+=trjGateChart(S.rows.map(r=>Object.assign({},r,{speed:ADk.val(r)})),'speed',label,unit,dec,color,' – kompensiert auf Gate '+ADk.gRef);
    const AD=trjAdj(S,key==='speed'?'speed':'dist'), fld=key==='speed'?'speed':'dist';
-   const GA=A.map(a=>({name:a.name,raw:a[key==='speed'?'sp':'di'],vals:a.jumps.filter(j=>j[fld]!=null).map(j=>AD.val(j))})).filter(g=>g.vals.length);
+   const GA=A.map(a=>({name:a.name,hl:trjHL.has(a.key),raw:a[key==='speed'?'sp':'di'],vals:a.jumps.filter(j=>j[fld]!=null).map(j=>AD.val(j))})).filter(g=>g.vals.length);
    const ref=trAvg(GA.flatMap(g=>g.vals));
-   out+=trBox(label+' zum Bezugsniveau'+(AD.on?' (Gates kompensiert)':''),'Ø '+label+' je Sportler minus Mittelwert aller Sprünge ('+trF(ref,dec+1)+' '+unit+'). Grün = über, orange = unter dem Bezugsniveau.'+(AD.on?' Die Werte sind auf Gate '+AD.gRef+' umgerechnet ('+AD.info.split(' · ')[0]+').':''),trDiff(GA.map(g=>({label:g.name,d:trAvg(g.vals)-ref,tip:g.name+': Ø '+trF(trAvg(g.vals),dec+1)+' '+unit+(AD.on?' (kompensiert; unkorrigiert '+trF(trAvg(g.raw),dec+1)+')':'')})).sort((a,b)=>b.d-a.d),{dec:dec+(unit==='m'?0:1)>2?2:dec+1,yl:'Differenz '+label+' ['+unit+']',minSpan:unit==='m'?.5:.1,label:label+' zum Bezugsniveau'}),trjGCCtl(AD,fld));
+   out+=trBox(label+' zum Bezugsniveau'+(AD.on?' (Gates kompensiert)':''),'Ø '+label+' je Sportler minus Mittelwert aller Sprünge ('+trF(ref,dec+1)+' '+unit+'). Grün = über, orange = unter dem Bezugsniveau.'+(AD.on?' Die Werte sind auf Gate '+AD.gRef+' umgerechnet ('+AD.info.split(' · ')[0]+').':''),trDiff(GA.map(g=>({label:g.name,hl:g.hl,d:trAvg(g.vals)-ref,tip:g.name+': Ø '+trF(trAvg(g.vals),dec+1)+' '+unit+(AD.on?' (kompensiert; unkorrigiert '+trF(trAvg(g.raw),dec+1)+')':'')})).sort((a,b)=>b.d-a.d),{dec:dec+(unit==='m'?0:1)>2?2:dec+1,yl:'Differenz '+label+' ['+unit+']',minSpan:unit==='m'?.5:.1,label:label+' zum Bezugsniveau'}));
    // Verlauf je Sprung
    const mx=trj.nJ;
    if(mx>1){
-     const top=[...G].filter(g=>g.vals.length>1).sort((a,b)=>trAvg(b.vals)-trAvg(a.vals)).slice(0,10);
+     const gl=[...G].filter(g=>g.vals.length>1).sort((a,b)=>trAvg(b.vals)-trAvg(a.vals)), top=gl.slice(0,10).concat(gl.slice(10).filter(g=>g.hl));
      const cats=Array.from({length:mx},(_,i)=>String(i+1));
-     out+=trBox(label+' je Sprung (Verlauf)','Entwicklung über die Sprünge der Einheit'+(G.filter(g=>g.vals.length>1).length>10?' – gezeigt werden die 10 Sportler mit dem besten Ø':'')+'. So siehst du Steigerung oder Ermüdung.',trLines(cats,top.map((g,i)=>({name:g.name,color:TR_PAL[i%10],vals:cats.map((_,k)=>{const x=trj.ath.find(q=>trjKey(q.name)===trjKey(g.name)); const j=x&&x.j[k]; const v=j?(key==='speed'?j.s:j.d):null; return v==null?null:v}),w:2.4})),{yt:label+' ['+unit+']',unit,endLbl:false,label:label+' Verlauf',fmt:v=>String(+(+v).toFixed(2)).replace('.',',')}),trLeg(top.map((g,i)=>[TR_PAL[i%10],g.name,1])));
+     out+=trBox(label+' je Sprung (Verlauf)','Entwicklung über die Sprünge der Einheit'+(cmp?' (Gates kompensiert)':'')+(G.filter(g=>g.vals.length>1).length>10?' – gezeigt werden die 10 Sportler mit dem besten Ø':'')+'. So siehst du Steigerung oder Ermüdung.',trLines(cats,top.map((g,i)=>({name:g.name,hl:g.hl,color:TR_PAL[i%10],vals:cats.map((_,k)=>{const x=trj.ath.find(q=>trjKey(q.name)===trjKey(g.name)); const j=x&&x.j[k]; let v=j?(key==='speed'?j.s:j.d):null; if(v!=null&&cmp){v=ADk.val({speed:j.s,gate:trjGate(j)})} return v==null?null:v}),w:2.4})),{yt:label+' ['+unit+']',unit,endLbl:false,label:label+' Verlauf',fmt:v=>String(+(+v).toFixed(2)).replace('.',',')}),trLeg(top.map((g,i)=>[TR_PAL[i%10],g.name,1])));
    }
    return out;
  };
@@ -5999,8 +6127,8 @@ function trjRenderAnalysis(){
  if(wk.length>1) L+=trBox('Ø Weite mit und ohne Telemark','Zeigt, ob Telemark-Landungen mit größeren Weiten zusammenhängen.',trBars(wk.map(x=>x.k+' ('+x.w.length+')'),[{name:'Ø Weite',color:'#7c3aed',vals:wk.map(x=>trAvg(x.w))}],{vals:true,yt:'Ø Weite [m]',unit:'m',label:'Ø Weite nach Telemark',H:260,fmt:v=>trF(v,1)}),'');
  const P=S.rows.filter(r=>r.speed!=null&&r.dist!=null), ai=new Map(A.map((a,i)=>[a.key,i]));
  if(P.length>=2){
-   const pts=P.map(r=>({x:r.speed,y:r.dist,c:TR_PAL[ai.get(trjKey(r.name))%10],t:`${r.name}: ${trF(r.speed,1)} km/h · ${trF(r.dist,1)} m${r.land?' · '+r.land:''}`})), rg=trRegress(pts);
-   L+=trBox('Speed × Weite','Jeder Punkt ist ein Sprung.'+(rg?` Trendlinie: ${trSg(rg.b,2)} m je km/h Speed, Zusammenhang r = ${trF(rg.r,2)} (${Math.abs(rg.r)>=.7?'stark':Math.abs(rg.r)>=.4?'mittel':'schwach'}).`:''),trScatter(pts,{xl:'Speed [km/h]',yl:'Weite [m]',line:rg,label:'Speed × Weite'}),trLeg(A.slice(0,10).map((a,i)=>[TR_PAL[i%10],a.name,1])));
+   const ADx=ADs, ADy=trjAdj(S,'dist'), cmpS=ADx.on&&ADy.on, pts=P.map(r=>({x:cmpS?ADx.val(r):r.speed,y:cmpS?ADy.val(r):r.dist,hl:trjHL.has(trjKey(r.name)),c:TR_PAL[ai.get(trjKey(r.name))%10],t:`${r.name}: ${trF(cmpS?ADx.val(r):r.speed,1)} km/h · ${trF(cmpS?ADy.val(r):r.dist,1)} m${cmpS?' (kompensiert, Gate '+ADx.gRef+')':''}${r.land?' · '+r.land:''}`})), rg=trRegress(pts);
+   L+=trBox('Speed × Weite'+(cmpS?' (Gates kompensiert)':''),'Jeder Punkt ist ein Sprung.'+(cmpS?' Speed und Weite sind auf Gate '+ADx.gRef+' umgerechnet.':'')+(rg?` Trendlinie: ${trSg(rg.b,2)} m je km/h Speed, Zusammenhang r = ${trF(rg.r,2)} (${Math.abs(rg.r)>=.7?'stark':Math.abs(rg.r)>=.4?'mittel':'schwach'}).`:''),trScatter(pts,{xl:'Speed [km/h]',yl:'Weite [m]',line:rg,label:'Speed × Weite'}),trLeg(A.slice(0,10).map((a,i)=>[TR_PAL[i%10],a.name,1])));
  }
  $('trjLandCharts').innerHTML=L||emp('Für diese Auswertung fehlen Landungs- oder Speed-/Weitenangaben.');
  // Tabelle aller Sprünge
