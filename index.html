@@ -722,6 +722,12 @@ details.cins-wrap .cins{margin-top:8px;border-top:0;padding-top:0}
 .sr-bibbtn .sr-fl{font-size:26px;line-height:1;margin-bottom:2px}.sr-bibbtn b{font-size:clamp(40px,5.6vw,58px)!important;line-height:1}.sr-bibbtn{min-height:118px}
 .sr-tend .sr-tm{display:inline-block;font-size:clamp(30px,4vw,44px);line-height:1.1;font-variant-numeric:tabular-nums;border-radius:8px;padding:0 10px;margin:2px 2px}.sr-tend.slow .sr-tm{background:#7f1d1d;color:#fecaca}.sr-tend.fast .sr-tm{background:#064e3b;color:#a7f3d0}
 .trj-hl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 12px;font-size:13px}.trj-hl .chip{border:1px solid #cbd5e1;background:#f1f5f9;color:#0b1f3a;border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer}.trj-hl .chip.on{background:#fbbf24;border-color:#d97706;font-weight:800}.trj-gcbar{margin:0 0 10px}
+.sl-kpi.sl-ok{border-left:5px solid #10b981}.sl-kpi.sl-mid{border-left:5px solid #f59e0b}.sl-kpi.sl-bad{border-left:5px solid #ef4444}.sl-kpi small em{font-style:normal;font-weight:800}.sl-kpi.sl-ok small em{color:#047857}.sl-kpi.sl-mid small em{color:#b45309}.sl-kpi.sl-bad small em{color:#b91c1c}
+td.sl-ok{color:#047857;font-weight:700;background:#ecfdf5}td.sl-mid{color:#b45309;font-weight:700;background:#fffbeb}td.sl-bad{color:#b91c1c;font-weight:700;background:#fef2f2}tr.sl-grp td{background:#e8f1fb;font-weight:800;color:#0b4f7a}tr.sl-key td:first-child{font-weight:800}
+#tddSollPers .chip{border:1px solid #cbd5e1;background:#f1f5f9;color:#0b1f3a;border-radius:999px;padding:5px 13px;font-size:13px;cursor:pointer}#tddSollPers .chip.on{background:#0284c7;border-color:#0369a1;color:#fff;font-weight:800}
+.sl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}.sl-grid .jchart{margin:0}.sl-grid svg{width:100%;height:auto}
+.sl-notes{margin-top:12px;border:1px solid #cfe0f2;background:#f4f9ff;border-radius:12px;padding:8px 14px}.sl-notes summary{cursor:pointer;font-weight:800;color:#0b4f7a}.sl-notes summary small{font-weight:500;color:#64748b}.sl-notes ul{margin:8px 0 4px;padding:0;list-style:none}.sl-notes li{padding:5px 0 5px 22px;position:relative;font-size:14px;border-top:1px solid #e3edf8}.sl-notes li:first-child{border:0}.sl-notes li:before{content:"";position:absolute;left:3px;top:11px;width:11px;height:11px;border-radius:50%;background:#94a3b8}.sl-notes li.sl-ok:before{background:#16a34a}.sl-notes li.sl-mid:before{background:#f5a30a}.sl-notes li.sl-bad:before{background:#e5383b}
+@media print{.sl-notes{break-inside:avoid}}
 /*TM-CSS-END*/
 </style>
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1494,7 +1500,7 @@ details.cins-wrap .cins{margin-top:8px;border-top:0;padding-top:0}
 <input type="file" id="tddFile" accept=".pdf,application/pdf" multiple style="display:none" onchange="tddUpload(this.files); this.value=''">
 <div class="dropzone" id="tddDrop">
 <b>TDD-PDFs hierher ziehen</b> &nbsp;oder&nbsp; <button type="button" class="small" onclick="$('tddFile').click()">Dateien auswählen</button>
-<small>Benötigt wird die PDF <b>„Abschnittsanalyse“</b> aus der TDD (Trainingsdatenbank des IAT, „sport-iat.de/tddnk“).</small>
+<small>Benötigt wird die PDF <b>„Abschnittsanalyse“</b> aus der TDD (Trainingsdatenbank des IAT, „sport-iat.de/tddnk“) – oder die <b>„Saisonauswertung“</b> für den Soll-Ist-Vergleich (wird automatisch erkannt).</small>
 </div>
 <div class="notice" style="margin-top:10px"><b>So bekommst du die richtige PDF:</b>
 <ol style="margin:6px 0 6px 18px;padding:0;line-height:1.55">
@@ -1506,9 +1512,19 @@ details.cins-wrap .cins{margin-top:8px;border-top:0;padding-top:0}
 <b>Mehrere Dateien möglich:</b> Pro PDF gilt ein Sportler in einer Saison. Du kannst beliebig viele laden – mehrere Sportler (für Vergleich und Teamauswertung) oder mehrere Jahre/Saisons desselben Sportlers (für den Vergleich über die Jahre). Jede PDF erscheint unten als eigene Datei.</div>
 <p class="run-summary" id="tddMsg"></p>
 <div class="tr-files" id="tddFiles"></div>
+<div class="tr-files" id="tddSollFiles"></div>
 <div class="notice">Die PDF wird nur hier im Browser gelesen, nichts wird hochgeladen. Die ausgewerteten Daten bleiben in diesem Browser gespeichert.</div>
 </section>
 
+<section class="card" id="tddSollHeadCard" style="display:none">
+<div class="tr-head"><h2 id="tddSollTitle">Soll-Ist-Vergleich</h2><div class="acts noprint"><span id="tddSollFileSel"></span><button type="button" class="small" onclick="trPrint(['tddSollHeadCard','tddSollChCard','tddSollTabCard'])">Alles drucken</button></div></div>
+<div class="tr-printhead" data-trh></div>
+<div class="tdd-range noprint" id="tddSollPers" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"></div>
+<div class="tr-kpis" id="tddSollKpis"></div>
+<div id="tddSollNotes"></div>
+</section>
+<section class="card" id="tddSollChCard" style="display:none"><div class="tr-head"><h2>Diagramme Soll und Ist</h2><div class="acts noprint"><button type="button" class="secondary small" onclick="trPrint(['tddSollChCard'])">Drucken</button></div></div><div class="tr-printhead" data-trh></div><div id="tddSollCharts"></div></section>
+<section class="card" id="tddSollTabCard" style="display:none"><div class="tr-head"><h2>Tabellen Soll und Ist</h2><div class="acts noprint"><button type="button" class="secondary small" onclick="trPrint(['tddSollTabCard'])">Drucken</button></div></div><div class="tr-printhead" data-trh></div><div id="tddSollTab"></div></section>
 <section class="card" id="tddHeadCard">
 <div class="tr-head"><h2 id="tddTitle">Dashboard</h2><div class="acts noprint"><span id="tddFileSel"></span><button type="button" class="small" onclick="trPrint(['tddHeadCard','tddLoadCard','tddJumpCard','tddStrCard','tddEndCard','tddPerCard','tddHeatCard'])">Dashboard drucken</button></div></div>
 <div class="tr-printhead" data-trh></div>
@@ -5794,6 +5810,7 @@ function trTable(head,rows,o){
 function trSetHeads(){
  let t='';
  if(mode==='trj'){const m=trj.meta||{}; t=['Sprungtraining',m.title,m.date?new Date(m.date+'T12:00').toLocaleDateString('de-DE'):'',m.place,m.hill,(m.k?'K '+m.k:''),(m.gate!==''&&m.gate!=null?'Gate '+m.gate:''),m.note].filter(Boolean).join(' · ')}
+ else if(mode==='tdd'&&tdv==='soll'&&tddSollCur()){const D=tddSollCur().data; t=['Soll-Ist-Vergleich',D.name,D.season?'Saison '+tddSeasonTxt(D.season):'',D.stand?'Stand '+D.stand:''].filter(Boolean).join(' · ')}
  else if(mode==='tdd'&&typeof tddCur==='function'&&tddCur()){const f=tddCur(); t=['Analyse TDD',f.data.name,f.data.season?'Saison '+tddSeasonTxt(f.data.season):'',f.data.stand?'Stand '+f.data.stand:'',tdv==='dash'&&typeof tddRngTxt==='function'?tddRngTxt(f):((tdv==='cmp'||tdv==='team')&&typeof tddCrTxt==='function'?tddCrTxt():'')].filter(Boolean).join(' · ')}
  document.querySelectorAll('[data-trh]').forEach(e=>e.textContent=t);
 }
@@ -6142,7 +6159,7 @@ function trjRenderAnalysis(){
  const _ta=tabAllowed, _dt=defaultTab, _um=window.updateModeUI, _cm=chooseMode, _bs=backToStart, _ni=navItems, _na=navActive, _ng=navGo;
  tabAllowed=function(id){
    if(mode==='trj') return id==='tab-trj'||id==='tab-db';
-   if(mode==='tdd') return id==='tab-tdd'||id==='tab-db';
+   if(mode==='tdd') return id==='tab-tdd';
    if(id==='tab-trj'||id==='tab-tdd') return false;
    return _ta(id);
  };
@@ -6177,7 +6194,7 @@ function trjRenderAnalysis(){
  navItems=function(){
    const an=(id,l,ic)=>({tab:'tab-trj',anchor:id,label:l,ico:ic});
    if(mode==='trj') return [{h:'Sprungtraining'},an('trjSetCard','Einheit','set'),an('trjEntryCard','Sprünge erfassen','start'),an('trjKpiCard','Überblick','res'),an('trjSpeedCard','Speed-Analyse','ana'),an('trjWeiteCard','Weiten-Analyse','ana'),an('trjLandCard','Landung & Zusammenhang','cmp'),an('trjTabCard','Tabelle','tab'),{h:'Daten'},{tab:'tab-db',label:'Sportler-Datenbank',ico:'db'}];
-   if(mode==='tdd'){const v=(k,l,ic)=>({tab:'tab-tdd',tdv:k,label:l,ico:ic}); return [{h:'Analyse TDD'},v('up','PDFs hochladen','up'),v('dash','Dashboard','ana'),v('cmp','Vergleich','cmp'),v('tab','Tabellen','tab'),v('team','Teamauswertung','start'),{h:'Daten'},{tab:'tab-db',label:'Sportler-Datenbank',ico:'db'}]}
+   if(mode==='tdd'){const v=(k,l,ic)=>({tab:'tab-tdd',tdv:k,label:l,ico:ic}); return [{h:'Analyse TDD'},v('up','PDFs hochladen','up'),v('dash','Dashboard','ana'),v('soll','Soll-Ist-Vergleich','res'),v('cmp','Vergleich','cmp'),v('tab','Tabellen','tab'),v('team','Teamauswertung','start')]}
    return _ni();
  };
  navActive=function(it){if(it.tdv) return activeTab()==='tab-tdd'&&tdv===it.tdv; return _na(it)};
@@ -6194,31 +6211,203 @@ function tddSave(){try{localStorage.setItem(TDD_KEY,JSON.stringify(tddFiles.map(
 function tddLoad(){try{const d=JSON.parse(localStorage.getItem(TDD_KEY)||'[]'); if(Array.isArray(d)) tddFiles=d.filter(f=>f&&f.data&&Array.isArray(f.data.periods)); _tddSeq=Math.max(0,...tddFiles.map(f=>f.id||0))+1}catch(e){tddFiles=[]}
  try{const s=parseInt(localStorage.getItem('nk_tddsel')||'0',10); tddSel=s>=0&&s<tddFiles.length?s:0}catch(e){}}
 function tddMsg(t){$('tddMsg').textContent=t||''}
+function tddSollNum(t,unit){
+ t=String(t).trim(); let m=t.match(/^(\d+):(\d{2})$/); if(m) return +m[1]+ +m[2]/60;
+ if(/^[\d.,]+$/.test(t)){const v=parseFloat(t.replace(/,/g,'')); return Number.isFinite(v)?v:null}
+ return null;
+}
+function tddSollIs(pages){return pages.some(items=>items.some(i=>/SAISONAUSWERTUNG/i.test(i.s)))}
+function tddSollParse(pages){
+ const out={name:'',season:'',stand:'',periods:[],rows:[]};
+ const items=pages[0]||[]; if(!items.length) return out;
+ const mid=i=>i.x+(i.w||String(i.s).length*4)/2;
+ const ys=[...new Set(items.map(i=>Math.round(i.y)))].sort((a,b)=>b-a), lines=[];
+ ys.forEach(y=>{const its=items.filter(i=>Math.round(i.y)===y).sort((a,b)=>a.x-b.x); const near=lines.find(l=>Math.abs(l.y-y)<=2); if(near){near.items.push(...its); near.items.sort((a,b)=>a.x-b.x)} else lines.push({y,items:its})});
+ const txt=l=>l.items.map(i=>i.s.trim()).join(' ');
+ lines.forEach(l=>{const t=txt(l); let m;
+   if(!out.name&&/^[^\d:]{3,60},\s*[^\d:]{2,40}\s+SAISONAUSWERTUNG/i.test(t)) out.name=t.split(/\s+SAISONAUSWERTUNG/i)[0].trim();
+   if(!out.name&&l.items[0]&&/^[^\d:]{3,60},\s*[^\d:]{2,40}$/.test(l.items[0].s.trim())&&/SAISONAUSWERTUNG/i.test(t)) out.name=l.items[0].s.trim();
+   if((m=t.match(/Saison\s+(\d{4})/i))&&!out.season) out.season=m[1].length===4?'20'+m[1].slice(0,2)+m[1].slice(2):m[1];
+   if((m=t.match(/Stand:\s*(\d{1,2}\.\d{1,2}\.\d{4})/))) out.stand=m[1];
+ });
+ const hl=lines.find(l=>l.items.filter(i=>/^(Plan|Ist)$/i.test(i.s.trim())).length>=4); if(!hl) return out;
+ const H=hl.items.filter(i=>/^(Plan|Ist)$/i.test(i.s.trim())).map(mid), np=Math.floor(H.length/2);
+ const pl=lines.filter(l=>l.y>hl.y&&l.y<hl.y+30).sort((a,b)=>a.y-b.y)[0];
+ for(let p=0;p<np;p++){
+   const c=(H[2*p]+H[2*p+1])/2, it=(pl?pl.items:[]).filter(i=>Math.abs(mid(i)-c)<(H[2*p+1]-H[2*p])*1.2).map(i=>i.s.trim()).join(' ');
+   const m=it.match(/^(.*?)\s*KW\s*(\d+)/i); out.periods.push({id:(m?m[1]:it||('P'+(p+1))).replace(/\s+/g,''),label:m?m[1].trim():it,kw:m?+m[2]:null});
+ }
+ let sec='';
+ lines.filter(l=>l.y<hl.y-2).forEach(l=>{
+   const t=txt(l); if(/Internet:|Stand:/.test(t)) return;
+   const nums=l.items.filter(i=>H.some(h=>Math.abs(mid(i)-h)<14)&&tddSollNum(i.s)!=null);
+   const unit=l.items.find(i=>/^(Anz|Std|km|Min)$/.test(i.s.trim()));
+   if(!unit){ if(l.items.length===1&&!nums.length) sec=l.items[0].s.trim(); return }
+   const lab=l.items.filter(i=>i.x<unit.x-2).map(i=>i.s.trim()).join(' ');
+   const v=new Array(H.length).fill(null); nums.forEach(i=>{let b=0,bd=1e9; H.forEach((h,k)=>{const d=Math.abs(mid(i)-h); if(d<bd){bd=d;b=k}}); v[b]=tddSollNum(i.s)});
+   out.rows.push({sec,label:lab,unit:unit.s.trim(),v});
+ });
+ return out;
+}
+
+// ---- Soll-Ist-Vergleich (PDF „Saisonauswertung“ aus der TDD: Plan und Ist je Periode) ----
+const TDD_SOLL_KEY='nk_tddsoll';
+let tddSolls=[], tddSollSel=0, tddSollPer=-1;
+function tddSollSave(){try{localStorage.setItem(TDD_SOLL_KEY,JSON.stringify(tddSolls))}catch(e){}}
+function tddSollLoad(){try{const d=JSON.parse(localStorage.getItem(TDD_SOLL_KEY)||'[]'); tddSolls=Array.isArray(d)?d.filter(f=>f&&f.data&&Array.isArray(f.data.rows)&&f.data.rows.length):[]}catch(e){tddSolls=[]}
+ try{const x=parseInt(localStorage.getItem('nk_tddsollsel')||'0',10); tddSollSel=x>=0&&x<tddSolls.length?x:0}catch(e){}}
+const tddSollCur=()=>tddSolls[tddSollSel]||null;
+function tddSollSelect(i){tddSollSel=i; try{localStorage.setItem('nk_tddsollsel',String(i))}catch(e){} tddRenderFiles(); if(tdv==='soll') tddSollRender()}
+async function tddSollRemove(i){
+ if(!await askConfirm('Saisonauswertung entfernen?',tddSolls[i].data.name+' ('+tddSolls[i].file+') wird entfernt.','Entfernen','Abbrechen')) return;
+ tddSolls.splice(i,1); if(tddSollSel>=tddSolls.length) tddSollSel=Math.max(0,tddSolls.length-1); tddSollSave();
+ if(tdv==='soll'&&!tddSolls.length) setTdv(tddFiles.length?'dash':'up'); else {tddRenderFiles(); if(tdv==='soll') tddSollRender()}
+}
+function tddSollSetPer(i){tddSollPer=i; tddSollRender()}
+// Zeile suchen: Bereich + Beschriftung (+ Einheit)
+function tddSollRow(D,sec,label,unit){return D.rows.find(r=>r.sec===sec&&r.label===label&&(!unit||r.unit===unit))||null}
+const tddSollFmt={Anz:v=>trF(v,0),Std:v=>trHM(v*60),km:v=>trF(v,1)};
+const tddSollF=(u,v)=>v==null?'–':(tddSollFmt[u]||(x=>trF(x,1)))(v);
+function tddSollPI(r,k){return r?{p:r.v[2*k],i:r.v[2*k+1]}:{p:null,i:null}}
+// Erfüllungsgrad in % und Bewertung (±10 % grün, ±25 % gelb, sonst rot)
+function tddSollPct(p,i){if(p==null||p===0) return (i==null||i===0)?null:Infinity; return (i||0)/p*100}
+function tddSollCls(pc){if(pc==null) return ''; if(pc===Infinity) return 'sl-mid'; const d=Math.abs(pc-100); return d<=10?'sl-ok':d<=25?'sl-mid':'sl-bad'}
+function tddSollCol(pc){return {'sl-ok':'#16a34a','sl-mid':'#f5a30a','sl-bad':'#e5383b','':'#94a3b8'}[tddSollCls(pc)]}
+const tddSollPctTxt=pc=>pc==null?'–':pc===Infinity?'ungeplant':trF(pc,0)+' %';
+const TDD_SOLL_AREAS=[
+ ['Sprünge','Sprünge','Gesamt','Anz','Sprünge gesamt',1],['Sprünge','Sprünge','HS 66-85','Anz','HS 66–85'],['Sprünge','Sprünge','HS 86-109','Anz','HS 86–109'],['Sprünge','Sprünge','HS >109','Anz','HS >109'],['Sprünge','Sprünge','HS <66','Anz','HS <66'],
+ ['Ausdauer & Intensität','Ausdauer','Gesamt','km','Ausdauer gesamt (km)',1],['Ausdauer & Intensität','Ausdauer','Gesamt','Std','Ausdauer gesamt (Std)',1],['Ausdauer & Intensität','IB','IB1','km','IB 1 (km)'],['Ausdauer & Intensität','IB','IB2','km','IB 2 (km)'],['Ausdauer & Intensität','IB','IB3','km','IB 3 (km)'],
+ ['Ausdauer & Intensität','Ausdauer','Rad','km','Rad (km)'],['Ausdauer & Intensität','Ausdauer','DL','km','Dauerlauf DL (km)'],['Ausdauer & Intensität','Ausdauer','RL','km','Rollerski RL (km)'],['Ausdauer & Intensität','Ausdauer','Ski','km','Ski (km)'],['Ausdauer & Intensität','Ausdauer','Inl','km','Inline (km)'],
+ ['Kraft & Schnelligkeit','Kraft/Schnelligkeit','Gesamt','Std','Kraft/Schnelligkeit gesamt',1],['Kraft & Schnelligkeit','Kraft/Schnelligkeit','Kraft','Std','Kraft'],['Kraft & Schnelligkeit','Kraft/Schnelligkeit','Schnellkraft','Std','Schnellkraft'],['Kraft & Schnelligkeit','Kraft/Schnelligkeit','Schnelligkeit','Std','Schnelligkeit'],['Kraft & Schnelligkeit','Kraft/Schnelligkeit','Kraftausdauer','Std','Kraftausdauer'],
+ ['Athletik','Athletik','Gesamt','Std','Athletik gesamt',1],['Athletik','Athletik','Gymnastik','Std','Gymnastik'],['Athletik','Athletik','Koord. allg.','Std','Koordination allg.'],['Athletik','Athletik','Koord. spez.','Std','Koordination spez.'],['Athletik','Athletik','Imitation','Std','Imitation'],
+ ['Gesamt','Gesamt','Gesamt','Std','Gesamtumfang (Std)',1]];
+let tddSollUnits={}; try{tddSollUnits=JSON.parse(localStorage.getItem('nk_sollunits')||'{}')||{}}catch(e){}
+function tddSollUnitOf(id){return tddSollUnits[id]==='h'?'h':'km'}
+function tddSollUnitSet(id,u){tddSollUnits[id]=u==='h'?'h':'km'; try{localStorage.setItem('nk_sollunits',JSON.stringify(tddSollUnits))}catch(e){} tddSollRender()}
+function tddSollUnitBtn(id){const u=tddSollUnitOf(id); return `<span class="tdd-unit noprint"><button type="button" class="${u==='km'?'on':''}" onclick="tddSollUnitSet('${id}','km')">km</button><button type="button" class="${u==='h'?'on':''}" onclick="tddSollUnitSet('${id}','h')">Stunden</button></span>`}
+// Stunden je Ausdauerart: nicht in der PDF -> Gesamt-Stunden der Ausdauer anteilig nach km verteilt (je Spalte Plan/Ist)
+function tddSollConv(D,r){
+ const km=tddSollRow(D,'Ausdauer','Gesamt','km'), h=tddSollRow(D,'Ausdauer','Gesamt','Std'); if(!km||!h||!r) return null;
+ return {...r,u:'Std',est:true,v:r.v.map((x,c)=>{const f=(km.v[c]>0&&h.v[c]!=null)?h.v[c]/km.v[c]:null; return x==null||f==null?null:x*f})};
+}
+// liefert Zeile + Einheit unter Berücksichtigung der Umschaltung km / Stunden
+function tddSollRowU(D,sec,lab,u,id){
+ const r=tddSollRow(D,sec,lab,u); if(!r) return {r:null,u};
+ if(tddSollUnitOf(id||'area')==='h'&&u==='km'){ if(sec==='Ausdauer'&&lab==='Gesamt') return {r:tddSollRow(D,'Ausdauer','Gesamt','Std'),u:'Std'}; const c=tddSollConv(D,r); return {r:c,u:'Std',est:true} }
+ return {r,u};
+}
+function tddSollAreas(D){
+ const h=tddSollUnitOf('area')==='h';
+ return TDD_SOLL_AREAS.filter(a=>!(h&&a[1]==='Ausdauer'&&a[2]==='Gesamt'&&a[3]==='km')).map(a=>{const q=tddSollRowU(D,a[1],a[2],a[3]); return {grp:a[0],lab:h&&q.est?a[4].replace('(km)','(Std ≈)'):a[4],key:a[5]===1,u:q.u,est:!!q.est,r:q.r}}).filter(a=>a.r&&a.r.v.some(x=>x!=null))}
+function tddSollBars(title,cats,pl,is,u,unitTxt,tot,uid){
+ const n=cats.length, W=560,H=290,L=44,R=8,T=34,B=58, mx=Math.max(1e-9,...pl.map(v=>v||0),...is.map(v=>v||0))*1.15, st=anaNiceStep(mx,4,false);
+ const top=Math.ceil(mx/st)*st, ph=H-T-B, py=v=>T+ph-(v/top)*ph, slot=(W-L-R)/n, bw=Math.min(44,slot*.36), fmt=v=>tddSollF(u,v);
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="${esc(title)} Soll und Ist" style="font-size:12px;fill:#334155">`;
+ for(let t=0;t<=top+1e-9;t+=st) s+=`<line x1="${L}" x2="${W-R}" y1="${py(t)}" y2="${py(t)}" stroke="#e5ebf3"/><text x="${L-6}" y="${py(t)+4}" text-anchor="end" style="font-size:10.5px">${u==='Std'?trF(t,0):trF(t,0)}</text>`;
+ cats.forEach((c,i)=>{const cx=L+slot*(i+.5), p=pl[i], v=is[i], pc=tddSollPct(p,v), col=tddSollCol(pc), last=i===n-1;
+   if(last&&n>1) s+=`<line x1="${L+slot*i}" x2="${L+slot*i}" y1="${T-8}" y2="${T+ph}" stroke="#cbd5e1" stroke-dasharray="3 3"/>`;
+   if(p!=null) s+=`<rect x="${cx-bw-2}" y="${py(p)}" width="${bw}" height="${Math.max(1,T+ph-py(p))}" fill="#dbe3ee" stroke="#64748b" stroke-width="1.4" rx="3"/><text x="${cx-bw/2-2}" y="${py(p)-5}" text-anchor="middle" style="font-size:10.5px;fill:#475569">${esc(fmt(p))}</text>`;
+   if(v!=null) s+=`<rect x="${cx+2}" y="${py(v)}" width="${bw}" height="${Math.max(1,T+ph-py(v))}" fill="${col}" rx="3"/><text x="${cx+bw/2+2}" y="${py(v)-5}" text-anchor="middle" style="font-size:10.5px;font-weight:800;fill:#0b1f3a">${esc(fmt(v))}</text>`;
+   s+=`<text x="${cx}" y="${H-B+17}" text-anchor="middle" style="font-weight:${last?800:600};fill:#0b1f3a">${esc(c)}</text><text x="${cx}" y="${H-B+34}" text-anchor="middle" style="font-weight:800;font-size:12.5px;fill:${pc==null?'#64748b':col}">${esc(tddSollPctTxt(pc))}</text>`});
+ s+=`<line x1="${L}" x2="${W-R}" y1="${T+ph}" y2="${T+ph}" stroke="#64748b"/></svg>`;
+ const tpc=tot?tddSollPct(tot.p,tot.i):null;
+ return `<div class="jchart">${uid?tddSollUnitBtn(uid):''}<p class="chart-title">${esc(title)}${unitTxt?' <small style="font-weight:500;color:#64748b">('+esc(unitTxt)+')</small>':''}</p>${tot?`<p class="chart-sub" style="margin:0 0 4px">Gesamtsaison: Ist <b>${esc(tddSollF(u,tot.i))}</b> von Soll ${esc(tddSollF(u,tot.p))} · <b style="color:${tpc==null?'#64748b':tddSollCol(tpc)}">${esc(tddSollPctTxt(tpc))}</b></p>`:''}${s}</div>`;
+}
+// Auffälligkeiten (nur Fakten, keine Empfehlungen), auf die Kernpunkte reduziert
+function tddSollNotes(D,k){
+ const N=[];
+ const chk=(pri,lab,sec,rl,u,tol,kk)=>{const r=tddSollRow(D,sec,rl,u); const q=tddSollPI(r,kk==null?k:kk), pc=tddSollPct(q.p,q.i); if(pc==null) return null; if(pc!==Infinity&&Math.abs(pc-100)<=tol) return null;
+   return {pri,pc,cls:tddSollCls(pc),txt:lab+(kk!=null&&kk!==k?' ('+D.periods[kk].label+')':'')+': '+(pc===Infinity?'Ist '+tddSollF(u,q.i)+', nicht geplant':tddSollPctTxt(pc)+' vom Soll (Ist '+tddSollF(u,q.i)+', Soll '+tddSollF(u,q.p)+')')}};
+ const L=[ [1,'Sprünge gesamt','Sprünge','Gesamt','Anz',10],[2,'HS 66–85','Sprünge','HS 66-85','Anz',25],[2,'HS 86–109','Sprünge','HS 86-109','Anz',25],[2,'HS >109','Sprünge','HS >109','Anz',25],
+  [3,'Ausdauer gesamt (km)','Ausdauer','Gesamt','km',10],[3,'Ausdauer gesamt (Std)','Ausdauer','Gesamt','Std',10],[4,'IB 1','IB','IB1','km',25],[4,'IB 2','IB','IB2','km',25],[4,'IB 3','IB','IB3','km',25],
+  [5,'Kraft/Schnelligkeit gesamt','Kraft/Schnelligkeit','Gesamt','Std',10],[6,'Kraft','Kraft/Schnelligkeit','Kraft','Std',25],[6,'Schnellkraft','Kraft/Schnelligkeit','Schnellkraft','Std',25],[6,'Schnelligkeit','Kraft/Schnelligkeit','Schnelligkeit','Std',25],[6,'Kraftausdauer','Kraft/Schnelligkeit','Kraftausdauer','Std',25],
+  [7,'Athletik gesamt','Athletik','Gesamt','Std',10],[8,'Gesamtumfang','Gesamt','Gesamt','Std',10]];
+ L.forEach(a=>{const o=chk(a[0],a[1],a[2],a[3],a[4],a[5]); if(o) N.push(o)});
+ // Perioden mit großer Abweichung bei den wichtigsten Bereichen (nur in der Gesamtansicht)
+ if(k===D.periods.length-1) D.periods.forEach((pp,kk)=>{if(kk===k) return; [['Sprünge','Sprünge','Gesamt','Anz'],['Ausdauer (km)','Ausdauer','Gesamt','km']].forEach(([lab,sec,rl,u],j)=>{const o=chk(1.5+j*2,lab,sec,rl,u,25,kk); if(o) N.push(o)})});
+ N.sort((a,b)=>a.pri-b.pri||Math.abs(b.pc-100)-Math.abs(a.pc-100));
+ return N.slice(0,6);
+}
+let tddSlNotesOpen=true; try{tddSlNotesOpen=localStorage.getItem('nk_slnotes')!=='0'}catch(e){}
+function tddSlNotesToggle(el){tddSlNotesOpen=el.open; try{localStorage.setItem('nk_slnotes',el.open?'1':'0')}catch(e){}}
+function tddSollRender(){
+ const f=tddSollCur(); const D=f&&f.data;
+ if(!D){['tddSollKpis','tddSollCharts','tddSollTab','tddSollNotes'].forEach(id=>$(id).innerHTML=''); $('tddSollPers').innerHTML=''; $('tddSollTitle').textContent='Soll-Ist-Vergleich'; return}
+ trSetHeads();
+ const np=D.periods.length; if(tddSollPer<0||tddSollPer>=np) tddSollPer=np-1;
+ const k=tddSollPer, per=D.periods[k], A=tddSollAreas(D);
+ $('tddSollTitle').textContent='Soll-Ist-Vergleich · '+(D.name||f.file)+(D.season?' · Saison '+tddSeasonTxt(D.season):'');
+ $('tddSollFileSel').innerHTML=tddSolls.length>1?`<select onchange="tddSollSelect(+this.value)">${tddSolls.map((x,i)=>`<option value="${i}"${i===tddSollSel?' selected':''}>${esc((x.data.name||x.file)+' · '+tddSeasonTxt(x.data.season))}</option>`).join('')}</select>`:'';
+ $('tddSollPers').innerHTML=D.periods.map((p,i)=>`<button type="button" class="chip${i===k?' on':''}" onclick="tddSollSetPer(${i})">${esc(p.label)}${p.kw?' <small>('+p.kw+' KW)</small>':''}</button>`).join('')+(D.stand?`<span class="tr-note" style="margin-left:10px">Stand ${esc(D.stand)}</span>`:'');
+ // Kennzahlen
+ const kp=A.filter(a=>a.key);
+ $('tddSollKpis').innerHTML=kp.map(a=>{const {p,i}=tddSollPI(a.r,k), pc=tddSollPct(p,i), dv=(i||0)-(p||0);
+   return `<div class="kpi-t sl-kpi ${tddSollCls(pc)}"><span>${esc(a.lab)} · ${esc(per.label)}</span><b>${esc(tddSollF(a.u,i))}</b><small>Soll ${esc(tddSollF(a.u,p))} · <em>${esc(tddSollPctTxt(pc))}</em> (${dv>=0?'+':'−'}${esc(tddSollF(a.u,Math.abs(dv)))})</small></div>`}).join('');
+ const NT=tddSollNotes(D,k), sets0=['sIB1','sIB2','sIB3','sAus'];
+ const unitNote=(tddSollUnitOf('area')==='h'||sets0.some(x=>tddSollUnitOf(x)==='h'))?'<p class="tr-note" style="margin:8px 0 0">Stunden je Ausdauerart (Rad, DL, RL, Ski, IB 1–3) sind <b>geschätzt</b> (≈): Die Gesamtstunden der Ausdauer aus der PDF sind anteilig nach km verteilt, also mit gleichem Tempo für alle Arten. Ausdauer gesamt ist der echte PDF-Wert.</p>':'';
+ $('tddSollNotes').innerHTML=unitNote+`<details class="sl-notes" ${tddSlNotesOpen?'open':''} ontoggle="tddSlNotesToggle(this)"><summary>Auffälligkeiten · ${esc(per.label)} <small>(${NT.length?NT.length+' Kernpunkt'+(NT.length>1?'e':''):'keine'})</small></summary>${NT.length?'<ul>'+NT.map(n=>`<li class="${n.cls}">${esc(n.txt)}</li>`).join('')+'</ul>':'<p class="tr-note" style="margin:6px 0">Alle Kernbereiche liegen innerhalb von ±10 % vom Soll.</p>'}</details>`;
+ // Diagramm 1: Erfüllungsgrad je Bereich (ausgewählte Periode)
+ const rows=A.map(a=>({...a,...tddSollPI(a.r,k)})).filter(a=>a.p!=null||a.i!=null);
+ const W=900,lw=230,rw=190,rh=24,top=26,gh=22; let grp='', y=top, items=[];
+ rows.forEach(a=>{if(a.grp!==grp){grp=a.grp; items.push({h:grp,y}); y+=gh} items.push({a,y}); y+=rh});
+ const H=y+24, xmax=150, px=v=>lw+Math.min(v,xmax)/xmax*(W-lw-rw);
+ let s1=trSvg(W,H,'Erfüllungsgrad je Bereich');
+ [0,50,100,150].forEach(t=>{s1+=`<line x1="${px(t)}" x2="${px(t)}" y1="${top-8}" y2="${H-20}" stroke="${t===100?'#0f172a':'#e5ebf3'}" stroke-width="${t===100?2:1}" ${t===100?'stroke-dasharray="5 3"':''}/><text x="${px(t)}" y="${H-6}" text-anchor="middle" style="${t===100?'font-weight:800':''}">${t===100?'Soll 100 %':t+' %'}</text>`});
+ items.forEach(it=>{
+   if(it.h){s1+=`<text x="6" y="${it.y+15}" style="font-weight:800;fill:#0b4f7a;font-size:12.5px">${esc(it.h)}</text><line x1="6" x2="${W-6}" y1="${it.y+19}" y2="${it.y+19}" stroke="#dbe7f3"/>`; return}
+   const a=it.a, pc=tddSollPct(a.p,a.i), w=pc==null?0:(pc===Infinity?px(xmax)-px(0):px(pc)-px(0)), col=tddSollCol(pc), b=a.key;
+   s1+=`<g><title>${esc(a.lab+': Soll '+tddSollF(a.u,a.p)+' · Ist '+tddSollF(a.u,a.i)+' · '+tddSollPctTxt(pc))}</title><text x="${lw-8}" y="${it.y+16}" text-anchor="end" style="${b?'font-weight:800;fill:#0b1f3a':''}">${esc(a.lab)}</text><rect x="${px(0)}" y="${it.y+4}" width="${Math.max(2,w)}" height="${rh-8}" rx="3" fill="${col}" ${pc===Infinity?'fill-opacity=".45" stroke="#d97706" stroke-dasharray="3 2"':''}/>`
+    +`<text x="${W-rw+10}" y="${it.y+16}" style="font-size:11.5px"><tspan style="font-weight:800;fill:${col==='#94a3b8'?'#64748b':col}">${esc(tddSollPctTxt(pc))}</tspan> <tspan style="fill:#64748b">· Ist ${esc(tddSollF(a.u,a.i))} / Soll ${esc(tddSollF(a.u,a.p))}</tspan></text></g>`});
+ s1+='</svg>';
+ let ch=trBox('Erfüllungsgrad je Bereich · '+per.label,'Ist in Prozent vom Plan (Soll). Gestrichelte Linie = 100 %. Grün = innerhalb ±10 %, gelb = ±10–25 %, rot = mehr als 25 % Abweichung, gestrichelt = nicht geplant, aber trainiert.',s1,tddSollUnitBtn('area')+trLeg([['#16a34a','±10 %'],['#f5a30a','±10–25 %'],['#e5383b','>25 %'],['#94a3b8','kein Soll']]));
+ // Diagramm 2: Soll und Ist je Periode (Sprünge und Ausdauer/Intensität zuerst)
+ const cats=D.periods.map(p=>p.label), sets=[['Sprünge','Sprünge','Gesamt','Anz','Sprünge'],['Ausdauer','Ausdauer','Gesamt','km','km','sAus'],['IB 1','IB','IB1','km','km','sIB1'],['IB 2','IB','IB2','km','km','sIB2'],['IB 3','IB','IB3','km','km','sIB3'],['Kraft/Schnelligkeit','Kraft/Schnelligkeit','Gesamt','Std','Std'],['Athletik','Athletik','Gesamt','Std','Std'],['Gesamtumfang','Gesamt','Gesamt','Std','Std']];
+ let g2='';
+ sets.forEach(([t,sec,lab,u0,ut0,uid])=>{const q=tddSollRowU(D,sec,lab,u0,uid), r=q.r, u=q.u, ut=u==='Std'&&u0==='km'?'Std (geschätzt)':ut0; if(!r||!r.v.some(x=>x!=null)) return;
+   const nc=D.periods.length>1&&/^gesamt$/i.test(D.periods[D.periods.length-1].id)?cats.length-1:cats.length, tp=r.v[2*(cats.length-1)], ti=r.v[2*(cats.length-1)+1];
+   g2+=tddSollBars(t,cats.slice(0,nc),cats.slice(0,nc).map((_,i)=>r.v[2*i]),cats.slice(0,nc).map((_,i)=>r.v[2*i+1]),u,ut,nc<cats.length?{p:tp,i:ti}:null,uid)});
+ $('tddSollCharts').innerHTML=ch+(g2?'<p class="chart-title" style="margin:16px 0 4px">Soll und Ist je Periode</p><p class="chart-sub">Grau = Soll (Plan), farbig = Ist. Die Farbe zeigt die Erfüllung (grün ±10 %, gelb ±10–25 %, rot &gt;25 % Abweichung). Die Gesamtsaison steht jeweils über dem Diagramm.</p><div class="sl-grid">'+g2+'</div>':'');
+ // Tabelle: Soll/Ist je Bereich für gewählte Periode + Matrix über alle Perioden
+ const dev=(a)=>{const d=(a.i||0)-(a.p||0); return (d>=0?'+':'−')+tddSollF(a.u,Math.abs(d))};
+ let t1=`<table class="tr-tab"><thead><tr><th>Bereich</th><th class="n">Soll</th><th class="n">Ist</th><th class="n">Abweichung</th><th class="n">Erfüllung</th></tr></thead><tbody>`;
+ grp=''; rows.forEach(a=>{if(a.grp!==grp){grp=a.grp; t1+=`<tr class="sl-grp"><td colspan="5">${esc(grp)}</td></tr>`} const pc=tddSollPct(a.p,a.i);
+   t1+=`<tr${a.key?' class="sl-key"':''}><td>${esc(a.lab)}</td><td class="n">${esc(tddSollF(a.u,a.p))}</td><td class="n">${esc(tddSollF(a.u,a.i))}</td><td class="n">${esc(dev(a))}</td><td class="n ${tddSollCls(pc)}">${esc(tddSollPctTxt(pc))}</td></tr>`});
+ t1+='</tbody></table>';
+ let t2=`<table class="tr-tab"><thead><tr><th>Bereich</th>${D.periods.map(p=>`<th class="n">${esc(p.label)}<br><small>Ist / Soll</small></th>`).join('')}</tr></thead><tbody>`;
+ grp=''; A.forEach(a=>{if(a.grp!==grp){grp=a.grp; t2+=`<tr class="sl-grp"><td colspan="${np+1}">${esc(grp)}</td></tr>`}
+   t2+=`<tr${a.key?' class="sl-key"':''}><td>${esc(a.lab)}</td>${D.periods.map((_,i)=>{const {p,i:ist}=tddSollPI(a.r,i), pc=tddSollPct(p,ist); return `<td class="n ${tddSollCls(pc)}">${p==null&&ist==null?'':esc(tddSollF(a.u,ist))+' / '+esc(tddSollF(a.u,p))+'<br><small>'+esc(tddSollPctTxt(pc))+'</small>'}</td>`}).join('')}</tr>`});
+ t2+='</tbody></table>';
+ $('tddSollTab').innerHTML=`<p class="chart-title" style="margin:6px 0">${esc(per.label)} – Soll und Ist je Bereich</p><div class="tr-scroll">${t1}</div><p class="chart-title" style="margin:18px 0 6px">Alle Perioden im Überblick</p><div class="tr-scroll">${t2}</div><p class="tr-note">Quelle: Saisonauswertung (TDD) · Plan und Ist stammen aus der PDF. Erfüllung = Ist ÷ Soll.</p>`;
+}
+
 function tddInit(){
- tddLoad();
+ tddLoad(); tddSollLoad();
  const z=$('tddDrop');
  if(z&&!_tddDrag){_tddDrag=true;
    ['dragenter','dragover'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault(); z.classList.add('over')}));
    ['dragleave','drop'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault(); z.classList.remove('over')}));
    z.addEventListener('drop',e=>{if(e.dataTransfer&&e.dataTransfer.files) tddUpload(e.dataTransfer.files)});
  }
- let v='up'; try{v=localStorage.getItem('nk_tdv')||'dash'}catch(e){} if(!tddFiles.length) v='up';
+ let v='up'; try{v=localStorage.getItem('nk_tdv')||'dash'}catch(e){} if(v==='soll'&&!tddSolls.length) v='dash'; if(v!=='soll'&&!tddFiles.length) v=tddSolls.length?'soll':'up';
  setTdv(v);
 }
 async function tddUpload(list){
  const files=[...list].filter(f=>/\.pdf$/i.test(f.name)||f.type==='application/pdf'); if(!files.length){tddMsg('Bitte PDF-Dateien auswählen.'); return}
- let ok=0, bad=[];
+ let ok=0, okS=0, bad=[];
  for(const f of files){
    tddMsg('Lese '+f.name+' …');
    try{
-     const pages=await anaExtract(new Uint8Array(await f.arrayBuffer())), data=tddParsePages(pages), wk=data.periods.reduce((q,p)=>q+p.weeks.length,0);
+     const pages=await anaExtract(new Uint8Array(await f.arrayBuffer()));
+     if(tddSollIs(pages)){const sd=tddSollParse(pages); if(!sd.rows.length||!sd.periods.length){bad.push(f.name); continue} tddSolls.push({id:Date.now()+okS,file:f.name,data:sd}); tddSollSel=tddSolls.length-1; okS++; continue}
+     const data=tddParsePages(pages), wk=data.periods.reduce((q,p)=>q+p.weeks.length,0);
      if(!wk){bad.push(f.name); continue}
      tddFiles.push({id:_tddSeq++,file:f.name,data}); ok++;
    }catch(e){bad.push(f.name+(e&&e.message==='NOPDFJS'?' (PDF-Bibliothek konnte nicht geladen werden – Internetverbindung?)':''))}
  }
  if(ok){tddSel=tddFiles.length-1; tddSave(); try{localStorage.setItem('nk_tddsel',String(tddSel))}catch(e){}}
- tddMsg((ok?ok+' Datei(en) ausgewertet. ':'')+(bad.length?'Nicht erkannt (keine TDD-Wochentabelle gefunden): '+bad.join(', ')+'. Es funktionieren PDFs mit echtem Text, keine Scans.':''));
- if(ok) setTdv('dash'); else tddRenderFiles();
+ if(okS){tddSollSave(); try{localStorage.setItem('nk_tddsollsel',String(tddSollSel))}catch(e){}}
+ tddMsg((ok?ok+' Datei(en) ausgewertet. ':'')+(okS?okS+' Saisonauswertung(en) (Soll-Ist) geladen. ':'')+(bad.length?'Nicht erkannt (weder TDD-Wochentabelle noch Saisonauswertung gefunden): '+bad.join(', ')+'. Es funktionieren PDFs mit echtem Text, keine Scans.':''));
+ if(okS) setTdv('soll'); else if(ok) setTdv('dash'); else tddRenderFiles();
 }
 function tddSelect(i){tddSel=i; try{localStorage.setItem('nk_tddsel',String(i))}catch(e){} tddRenderFiles(); if(tdv!=='up') tddRenderView()}
 async function tddRemove(i){
@@ -6227,18 +6416,20 @@ async function tddRemove(i){
  if(!tddFiles.length) setTdv('up'); else {tddRenderFiles(); tddRenderView()}
 }
 function tddRenderFiles(){
+ $('tddSollFiles').innerHTML=tddSolls.map((f,i)=>`<div class="tr-file${i===tddSollSel?' on':''}" onclick="tddSollSelect(${i})"><i style="background:#f59e0b"></i><div><b>${esc(f.data.name||f.file)}</b> <span class="tr-tag">Soll-Ist</span><br><small>${esc(tddSeasonTxt(f.data.season))} · ${f.data.periods.length} Perioden · ${esc(f.file)}</small></div><button type="button" class="x" title="Entfernen" onclick="event.stopPropagation();tddSollRemove(${i})">×</button></div>`).join('');
  $('tddFiles').innerHTML=tddFiles.map((f,i)=>`<div class="tr-file${i===tddSel?' on':''}" onclick="tddSelect(${i})"><i style="background:${TDD_FC[i%8]}"></i><div><b>${esc(f.data.name||f.file)}</b><br><small>${esc(tddSeasonTxt(f.data.season))} · ${f.data.periods.reduce((q,p)=>q+p.weeks.length,0)} Wochen · ${esc(f.file)}</small></div><button title="Entfernen" onclick="event.stopPropagation();tddRemove(${i})">×</button></div>`).join('');
  const sel=$('tddFileSel'); sel.innerHTML=tddFiles.length>1?`<select onchange="tddSelect(+this.value)">${tddFiles.map((f,i)=>`<option value="${i}"${i===tddSel?' selected':''}>${esc((f.data.name||f.file)+' · '+tddSeasonTxt(f.data.season))}</option>`).join('')}</select>`:'';
 }
 function setTdv(v){
  tdv=v; try{localStorage.setItem('nk_tdv',v)}catch(e){}
- const show={tddUpCard:v==='up',tddHeadCard:v==='dash',tddLoadCard:v==='dash',tddJumpCard:v==='dash',tddStrCard:v==='dash',tddEndCard:v==='dash',tddPerCard:v==='dash',tddHeatCard:v==='dash',tddCmpCard:v==='cmp',tddTabCard:v==='tab',tddTeamCard:v==='team'};
+ const show={tddUpCard:v==='up',tddHeadCard:v==='dash',tddLoadCard:v==='dash',tddJumpCard:v==='dash',tddStrCard:v==='dash',tddEndCard:v==='dash',tddPerCard:v==='dash',tddHeatCard:v==='dash',tddCmpCard:v==='cmp',tddTabCard:v==='tab',tddTeamCard:v==='team',tddSollHeadCard:v==='soll',tddSollChCard:v==='soll',tddSollTabCard:v==='soll'};
  Object.keys(show).forEach(id=>$(id).style.display=show[id]?'':'none');
  document.body.dataset.tdv=v;
  tddRenderFiles(); if(v!=='up') tddRenderView();
  try{renderNav()}catch(e){} window.scrollTo&&window.scrollTo(0,0);
 }
 function tddRenderView(){
+ if(tdv==='soll'){tddSollRender(); return}
  const f=tddCur();
  if(!f){ ['tddKpis','tddLoadCharts','tddJumpCharts','tddStrCharts','tddEndCharts','tddPerCharts','tddHeat','tddCmp','tddTabs','tddTeam'].forEach(id=>$(id).innerHTML=''); $('tddHint').textContent='Noch keine Datei geladen.'; return }
  trSetHeads();
@@ -6295,9 +6486,10 @@ function tddRngPreset(p){
  else{const P=tddPers(WA).find(x=>x.id===p); if(P){a=P.a; b=P.b}}
  if(a==null) return; tddRngPut(f,{a,b,mode:R.mode}); tddRngRedraw();
 }
-let tddUnit='km'; try{if(localStorage.getItem('nk_tddunit')==='h') tddUnit='h'}catch(e){}
-function tddUnitSet(u){tddUnit=u==='h'?'h':'km'; try{localStorage.setItem('nk_tddunit',tddUnit)}catch(e){} tddRngRedraw()}
-function tddUnitBtn(){return `<span class="tdd-unit noprint"><button type="button" class="${tddUnit==='km'?'on':''}" onclick="tddUnitSet('km')">km</button><button type="button" class="${tddUnit==='h'?'on':''}" onclick="tddUnitSet('h')">Stunden</button></span>`}
+let tddUnits={}; try{tddUnits=JSON.parse(localStorage.getItem('nk_tddunits')||'{}')||{}}catch(e){}
+function tddUnitOf(id){return tddUnits[id]==='h'?'h':'km'}
+function tddUnitSet(id,u){tddUnits[id]=u==='h'?'h':'km'; try{localStorage.setItem('nk_tddunits',JSON.stringify(tddUnits))}catch(e){} tddRngRedraw()}
+function tddUnitBtn(id){const u=tddUnitOf(id); return `<span class="tdd-unit noprint"><button type="button" class="${u==='km'?'on':''}" onclick="tddUnitSet('${id}','km')">km</button><button type="button" class="${u==='h'?'on':''}" onclick="tddUnitSet('${id}','h')">Stunden</button></span>`}
 function tddWkLbl(w){return 'KW '+w.kw+(w.date?' · '+w.date:'')}
 function tddRngTxt(f){
  const WA=tddWeeks(f), R=tddRngGet(f,WA.length); if(!R.on) return '';
@@ -6388,10 +6580,10 @@ function tddDash(f){
  // --- Ausdauer & Intensität ---
  const fm=[['rad','Rad','#f59e0b'],['dl','DL','#0284c7'],['rl','RL','#10b981'],['inl','Inl','#7c3aed'],['ski','Ski','#0d9488']], ibc=['#86efac','#f59e0b','#dc2626'];
  let E='';
- const hu=tddUnit==='h', cv=(w,v)=>{if(!hu) return v; const den=w.rad+w.dl+w.rl+w.inl+w.ski; return den>0?v*w.endM/60/den:0}, uf=hu?(v=>trF(v,1)):(v=>String(Math.round(v))), uy=hu?'Std je Woche':'km je Woche', uu=hu?'Std':'km';
- const hNote=hu?' Stunden = Ausdauerzeit der Woche (Gesamtumfang minus Kraft, Athletik, Sprünge), anteilig nach Kilometern verteilt – eine Schätzung, die PDF enthält Zeiten nur für die ganze Woche.':'';
- E+=trBox('Ausdauerumfang je Woche','Kilometer nach Form (Kürzel wie in der PDF: DL, RL, Inl, Ski; Rad separat).'.replace('Kilometer',hu?'Stunden':'Kilometer')+hNote,trBars(cats,fm.map(k=>({name:k[1],color:k[2],vals:W.map(w=>cv(w,w[k[0]]))})),{bands,yt:uy,unit:uu,fmt:uf,label:'Ausdauer'}),tddUnitBtn()+trLeg(fm.map(k=>[k[2],k[1]])));
- E+=trBox('Intensitätsbereiche je Woche',(hu?'Stunden':'Kilometer')+' in Intensitätsbereich 1, 2 und 3 (ohne Rad, da die PDF Rad nicht nach Bereichen trennt).'+hNote,trBars(cats,[0,1,2].map(i=>({name:'IB '+(i+1),color:ibc[i],vals:W.map(w=>cv(w,[w.ib1,w.ib2,w.ib3][i]))})),{bands,yt:uy,unit:uu,fmt:uf,label:'Intensitätsbereiche'}),tddUnitBtn()+trLeg(ibc.map((c,i)=>[c,'Intensitätsbereich '+(i+1)])));
+ const cvf=(hu,w,v)=>{if(!hu) return v; const den=w.rad+w.dl+w.rl+w.inl+w.ski; return den>0?v*w.endM/60/den:0};
+ const uo=id=>{const hu=tddUnitOf(id)==='h'; return {hu,cv:(w,v)=>cvf(hu,w,v),uf:hu?(v=>trF(v,1)):(v=>String(Math.round(v))),uy:hu?'Std je Woche':'km je Woche',uu:hu?'Std':'km',note:hu?' Stunden = Ausdauerzeit der Woche (Gesamtumfang minus Kraft, Athletik, Sprünge), anteilig nach Kilometern verteilt – eine Schätzung, die PDF enthält Zeiten nur für die ganze Woche.':''}};
+ {const o=uo('end'); E+=trBox('Ausdauerumfang je Woche',(o.hu?'Stunden':'Kilometer')+' nach Form (Kürzel wie in der PDF: DL, RL, Inl, Ski; Rad separat).'+o.note,trBars(cats,fm.map(k=>({name:k[1],color:k[2],vals:W.map(w=>o.cv(w,w[k[0]]))})),{bands,yt:o.uy,unit:o.uu,fmt:o.uf,label:'Ausdauer'}),tddUnitBtn('end')+trLeg(fm.map(k=>[k[2],k[1]])));}
+ {const o=uo('ib'); E+=trBox('Intensitätsbereiche je Woche',(o.hu?'Stunden':'Kilometer')+' in Intensitätsbereich 1, 2 und 3 (ohne Rad, da die PDF Rad nicht nach Bereichen trennt).'+o.note,trBars(cats,[0,1,2].map(i=>({name:'IB '+(i+1),color:ibc[i],vals:W.map(w=>o.cv(w,[w.ib1,w.ib2,w.ib3][i]))})),{bands,yt:o.uy,unit:o.uu,fmt:o.uf,label:'Intensitätsbereiche'}),tddUnitBtn('ib')+trLeg(ibc.map((c,i)=>[c,'Intensitätsbereich '+(i+1)])));}
  const pe=[...T.per,{id:'Saison',...A}];
  E+=`<div class="tr-grid2">`+trBox('Ø Ausdauerstunden je Woche','Mittelwert je Periode (VP1, VP2 …) und für die gesamte Saison; Wochen mit Training.',trBars(pe.map(p=>p.id),[{name:'Std je Woche',color:'#0284c7',vals:pe.map(p=>p.ew)}],{W:460,H:250,maxBw:64,vals:true,yt:'Std je Woche',fmt:v=>trF(v,1),label:'Ø Ausdauerstunden'}),'')+trBox('Ø Kilometer je Woche','Mittelwert je Periode und für die gesamte Saison; Wochen mit Training.',trBars(pe.map(p=>p.id),[{name:'km je Woche',color:'#0d9488',vals:pe.map(p=>p.kw)}],{W:460,H:250,maxBw:64,vals:true,yt:'km je Woche',fmt:v=>trF(v,0),label:'Ø km je Woche'}),'')+`</div>`;
  E+=`<div class="tr-grid2">`+trDonut('Intensitätsverteilung','Anteil der km in IB 1 / 2 / 3'+(A.ibT?` – IB 1 macht ${trF(A.ibp[0],0)} % aus.`:'.'),[0,1,2].map(i=>({label:'IB '+(i+1),v:A.ib[i],col:ibc[i],dec:0})),'km')+trDonut('Ausdauer nach Form','Anteile der Saison-Kilometer.',fm.map(k=>({label:k[1],v:A[k[0]],col:k[2],dec:0})),'km')+`</div>`;
@@ -7178,7 +7370,7 @@ function srCsv(){
 }
 
 /*TM-JS-BEGIN*/
-/* ===== Vergleich: Auffälligkeiten & Empfehlungen ===== */
+/* ===== Vergleich: Auffälligkeiten (keine Empfehlungen) ===== */
 const TDD_CT_DEF={dev:25,ksMin:15,rise:15,acwr:1.5,hardRun:4,recov:75,ibHigh:25,jumpGap:6,jumpMax:25,begMin:1,perChg:25,sumDiff:2};
 const TDD_CT_LBL={dev:['Abweichung vom Mittel der anderen Dateien ab (%)',5,100],ibHigh:['Intensität IB 2+3 je Periode über (% der km)',10,60],ksMin:['Kraft+Athletik unter (% der Trainingszeit je Periode)',3,40],begMin:['Beweglichkeit unter (Std je Woche, Ø)',0.2,5],jumpGap:['Wochen ohne Sprünge ab',2,20],jumpMax:['Sprünge je Woche über',10,80],rise:['Steigerung zur Vorwoche über (%)',5,60],acwr:['Akut:Chronisch über',1.2,2.5],hardRun:['Harte Wochen in Folge ab',2,10],recov:['Entlastungswoche = unter (% des Saison-Ø)',40,95],perChg:['Periodenwechsel Umfang ab (%)',10,80],sumDiff:['PDF-Summe weicht ab (%)',1,20]};
 let tddCt={...TDD_CT_DEF};
@@ -7279,7 +7471,7 @@ function tddInsToggle(el){try{localStorage.setItem('nk_cinsopen',el.open?'1':'0'
 function tddCmpIns(S,nm,col){
  const R=tddCmpInsData(S,nm), tag={risk:'Achtung',warn:'Hinweis',info:'Info',ok:'Gut'}, ord={risk:0,warn:1,info:2,ok:3};
  const cnt=l=>Object.values(R).reduce((q,a)=>q+a.filter(x=>x.lvl===l).length,0);
- let h=`<details class="cins-wrap" id="tddCmpIns"${tddInsOpen()?' open':''} ontoggle="tddInsToggle(this)"><summary><span class="cins-sum">Auffälligkeiten &amp; Empfehlungen</span> <small>${cnt('risk')} Achtung · ${cnt('warn')} Hinweise · ${cnt('info')} Infos · ${cnt('ok')} im Ziel</small> <span class="cins-hint noprint">ein-/ausklappen</span></summary><div class="cins"><p class="chart-sub">${tddCrOn()?'Zeitraum: '+tddCrTxt()+' (Saison-Vorgaben für Sprünge und Ausdauerstunden werden dafür nicht geprüft). ':''}Regelbasierte Hinweise aus den Wochenzahlen der geladenen Dateien: im Vergleich zu den anderen Dateien, zu den RTP-Vorgaben (Teamauswertung) und nach allgemeinen Trainingsgrundsätzen. Jede Auffälligkeit steht nur einmal; die Richtung (mehr/weniger) steht in der jeweiligen Zeile.</p>`;
+ let h=`<details class="cins-wrap" id="tddCmpIns"${tddInsOpen()?' open':''} ontoggle="tddInsToggle(this)"><summary><span class="cins-sum">Auffälligkeiten</span> <small>${cnt('risk')} Achtung · ${cnt('warn')} Hinweise · ${cnt('info')} Infos · ${cnt('ok')} im Ziel</small> <span class="cins-hint noprint">ein-/ausklappen</span></summary><div class="cins"><p class="chart-sub">${tddCrOn()?'Zeitraum: '+tddCrTxt()+' (Saison-Vorgaben für Sprünge und Ausdauerstunden werden dafür nicht geprüft). ':''}Regelbasierte Hinweise aus den Wochenzahlen der geladenen Dateien: im Vergleich zu den anderen Dateien, zu den RTP-Vorgaben (Teamauswertung) und nach allgemeinen Trainingsgrundsätzen. Jede Auffälligkeit steht nur einmal; die Richtung (mehr/weniger) steht in der jeweiligen Zeile.</p>`;
  TDD_INS_CATS.forEach(([k,l])=>{
    const items=R[k], bad=items.filter(x=>x.lvl!=='ok').length;
    h+=`<div class="cins-cat"><h4>${esc(l)} <small>${bad?bad+' Auffälligkeit'+(bad===1?'':'en'):'unauffällig'}</small></h4>`;
@@ -7289,8 +7481,7 @@ function tddCmpIns(S,nm,col){
      const lvl=g.list.reduce((m,x)=>ord[x.lvl]<ord[m]?x.lvl:m,'ok');
      const rows=g.list.map(x=>`<li class="lv-${x.lvl}"><span class="who"><i style="background:${col(x.i)}"></i>${esc(nm(S[x.i]))}</span>${x.dir?` <b class="dir">${esc(x.dir)}:</b>`:''} ${esc(x.text)}${g.list.length>1&&x.lvl!==lvl?` <em class="lv ${x.lvl}">${tag[x.lvl]}</em>`:''}</li>`).join('');
      const recs=[]; g.list.forEach(x=>{if(!x.rec) return; let r=recs.find(y=>y.t===x.rec); if(!r){r={t:x.rec,d:[]}; recs.push(r)} if(x.dir&&!r.d.includes(x.dir)) r.d.push(x.dir)});
-     const rec=recs.length===1?`<p class="rec">Empfehlung: ${esc(recs[0].t)}</p>`:(recs.length?`<p class="rec">Empfehlung:</p><ul class="recs">${recs.map(r=>`<li>${r.d.length?`<b>${esc(r.d.join('/'))}:</b> `:''}${esc(r.t)}</li>`).join('')}</ul>`:'');
-     h+=`<div class="ins ${lvl}"><span class="tag">${tag[lvl]}</span><div><b>${esc(g.title)}</b>${g.list.length>1?` <small class="cnt">${g.list.length} Dateien</small>`:''}<ul>${rows}</ul>${rec}</div></div>`;
+     h+=`<div class="ins ${lvl}"><span class="tag">${tag[lvl]}</span><div><b>${esc(g.title)}</b>${g.list.length>1?` <small class="cnt">${g.list.length} Dateien</small>`:''}<ul>${rows}</ul></div></div>`;
    });
    h+='</div>';
  });
