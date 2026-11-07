@@ -7357,7 +7357,7 @@ function ssFinal(){
  const S=ssStand(), out={};
  ['g','m','k'].forEach(g=>{
    const mem=S.rows.filter(r=>r.grp===g).sort((a,b)=>a.o.nr-b.o.nr).map((r,i)=>({r,pos:i+1,reihe:i===0?0:Math.ceil(i/3)}));
-   out[g]=mem.map(x=>Object.assign(x,{pl:((ss.fin[g]||{})[x.r.o.id]||{}).pl||''}));
+   out[g]=mem.map(x=>Object.assign(x,{pl:((ss.fin[g]||{})[x.r.o.id]||{}).pl||'',fs:((ss.fin[g]||{})[x.r.o.id]||{}).fs||0}));
  });
  return {S,out};
 }
@@ -7410,7 +7410,8 @@ function ssNext(r,f,id){
  const ids=ss.heats[r][f], used=ids.filter(x=>x!==id).map(x=>parseInt(ssPl(r,f,x),10)).filter(n=>n>0); let n=1; while(used.includes(n)) n++; if(n>ids.length) n=ids.length; ssSetPl(r,f,id,String(n));
 }
 function ssFsCycle(r,f,id){ const k=r+'_'+f; ss.res[k]=ss.res[k]||{}; const x=ss.res[k][id]=ss.res[k][id]||{}; x.fs=((x.fs||0)+1)%3; ssSave(); ssRenderAll() }
-function ssSetFin(g,id,v){ ss.fin[g]=ss.fin[g]||{}; ss.fin[g][id]={pl:v}; ssSave(); ssRenderAll() }
+function ssSetFin(g,id,v){ ss.fin[g]=ss.fin[g]||{}; ss.fin[g][id]=Object.assign(ss.fin[g][id]||{},{pl:v}); ssSave(); ssRenderAll() }
+function ssFsFin(g,id){ ss.fin[g]=ss.fin[g]||{}; const x=ss.fin[g][id]=ss.fin[g][id]||{}; x.fs=((x.fs||0)+1)%3; ssSave(); ssRenderAll() }
 function ssNextFin(g,id){ const mem=ssFinal().out[g]; const used=mem.filter(m=>m.r.o.id!==id).map(m=>parseInt(m.pl,10)).filter(n=>n>0); let n=1; while(used.includes(n)) n++; if(n>mem.length) n=mem.length; ssSetFin(g,id,String(n)) }
 // ---- Darstellung ----
 const ssSel=(cur,n,fn)=>`<select class="ss-pl" onchange="${fn}(this.value)"><option value=""${cur===''?' selected':''}>–</option>${Array.from({length:n},(_,i)=>`<option${String(i+1)===cur?' selected':''}>${i+1}</option>`).join('')}${['DNS','DNF','DSQ'].map(s=>`<option${cur===s?' selected':''}>${s}</option>`).join('')}</select>`;
@@ -7461,7 +7462,7 @@ function ssRenderFin(){
  const F=ssFinal(), rc=['#16a34a','#eab308','#dc2626','#2563eb','#7c3aed'];
  $('ssFin').innerHTML='<div class="ss-flights">'+['g','m','k'].map(g=>{const mem=F.out[g], n=mem.length, hc={g:'#c4bd97;color:#3b3519',m:'#002060;color:#fff',k:'#4bacc6;color:#fff'}[g];
   return `<div class="ss-fl"><div class="ss-fh" style="background:${hc}"><b>${SS_GN[g]}</b><span>${n} Starter</span><span class="ss-fc">${mem.filter(m=>m.pl!=='').length}/${n}</span></div><table class="ss-t ss-ft"><thead><tr><th>Startpl.</th><th class="l">Name</th><th>Reihe</th><th class="noprint"></th><th>Platz</th></tr></thead><tbody>`+
-  mem.map(m=>`<tr><td><b>${m.pos}</b></td><td class="l">${esc(m.r.o.a.name)}<small>Sprung-Nr ${m.r.o.nr} · Vorl. ${m.r.tot} Pkt.</small></td><td>${m.reihe===0?'<span class="ss-row" style="background:#f59e0b">Sprungbester</span>':`<span class="ss-row" style="background:${rc[(m.reihe-1)%rc.length]}">${m.reihe}</span>`}</td><td class="noprint"><button type="button" class="small" onclick="ssNextFin('${g}',${m.r.o.id})">Ziel</button></td><td>${ssSel(m.pl,n,`ssSetFin('${g}',${m.r.o.id},`)}</td></tr>`).join('')+'</tbody></table></div>'}).join('')+'</div>'+
+  mem.map(m=>`<tr><td><b>${m.pos}</b></td><td class="l">${esc(m.r.o.a.name)}<small>Sprung-Nr ${m.r.o.nr} · Vorl. ${m.r.tot} Pkt.</small>${m.fs?`<small class="ss-fsl">${m.fs>=2?'2. Fehlstart – Jury':'Fehlstart'}</small>`:''}</td><td>${m.reihe===0?'<span class="ss-row" style="background:#f59e0b">Sprungbester</span>':`<span class="ss-row" style="background:${rc[(m.reihe-1)%rc.length]}">${m.reihe}</span>`}</td><td class="noprint ss-bt"><button type="button" class="secondary small ss-fsb${m.fs?' on':''}" onclick="ssFsFin('${g}',${m.r.o.id})" title="Fehlstart; 2. Fehlstart = Jury entscheidet">FS</button> <button type="button" class="small" onclick="ssNextFin('${g}',${m.r.o.id})" title="Nächsten freien Platz vergeben">Ziel</button></td><td>${ssSel(m.pl,n,`ssSetFin('${g}',${m.r.o.id},`)}</td></tr>`).join('')+'</tbody></table></div>'}).join('')+'</div>'+
   '<p class="tr-note">Aufstellung nach der Sprungrangliste: Startplatz 1 = Sprungbester (vorne), danach je drei Läufer pro Reihe (Reihe 1 = Plätze 2–4, Reihe 2 = 5–7 …).</p>';
 }
 function ssRenderRes(){
