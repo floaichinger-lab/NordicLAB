@@ -906,6 +906,7 @@ td.sl-ok{color:#047857;font-weight:700;background:#ecfdf5}td.sl-mid{color:#b4530
 <datalist id="athleteList"></datalist>
 <datalist id="teamList"></datalist>
 <main>
+<div class="trj-wb noprint" id="wkBar" style="display:none" aria-label="Arbeitsblätter"><div class="trj-tabstrip" id="wkBarList" role="tablist"></div><button type="button" class="trj-tab-add" onclick="wkBook.newSheet()" title="Neues Arbeitsblatt (leerer Wettkampf)">+</button><button type="button" class="trj-tab-copy" onclick="wkBook.newSheet()" title="Neuen, leeren Wettkampf als weiteres Arbeitsblatt anlegen">Neu</button></div>
 
 <div class="panel active" id="tab-jump">
 
@@ -1418,8 +1419,9 @@ td.sl-ok{color:#047857;font-weight:700;background:#ecfdf5}td.sl-mid{color:#b4530
 
 <!--P2-PANEL-BEGIN-->
 <div class="panel" id="tab-p220">
+<div class="trj-wb noprint" id="p220Bar" aria-label="Arbeitsblätter"><div class="trj-tabstrip" id="p220BarList" role="tablist"></div><button type="button" class="trj-tab-add" onclick="p220Book.newSheet()" title="Neues Arbeitsblatt (leere Liste)">+</button><button type="button" class="trj-tab-copy" onclick="p220Book.newSheet()" title="Neue, leere Liste als weiteres Arbeitsblatt anlegen">Neu</button></div>
 <section class="card tr-nb" id="p220SetCard">
-<div class="tr-head"><h2>220-Punkte-Liste <span class="tr-tag">Wettkampf</span></h2><div class="acts noprint"><button type="button" class="secondary small" onclick="p220New()">Neue Liste</button><button type="button" class="secondary small" onclick="p220Csv()">CSV</button><button type="button" class="small" onclick="p220Print()">Drucken / PDF</button></div></div>
+<div class="tr-head"><h2>220-Punkte-Liste <span class="tr-tag">Wettkampf</span></h2><div class="acts noprint"><button type="button" class="secondary small" onclick="p220Book.newSheet()">Neu</button><button type="button" class="secondary small" onclick="p220Csv()">CSV</button><button type="button" class="small" onclick="p220Print()">Drucken / PDF</button></div></div>
 <div class="tr-printhead" data-trh></div>
 <div class="grid g5">
 <div><label>Bezeichnung</label><input id="p2_title" placeholder="z. B. Qualifikation WC Lillehammer" oninput="p220MetaSave()"></div>
@@ -1784,7 +1786,6 @@ function updateModeUI(){
  if(act&&!tabAllowed(act.id)) showTab(defaultTab());
 }
 async function backToStart(){
- if(rows.length&&!await askConfirm('Zur Startseite wechseln?','Nicht gespeicherte Eingaben in der Teilnehmerliste gehen dabei verloren.','Wechseln','Abbrechen')) return;
  rows=[]; mode=null; teamRun={};
  try{localStorage.removeItem('nk_mode'); localStorage.removeItem('nk_format')}catch(e){}
  showStartMain();
@@ -6966,7 +6967,7 @@ function p220Load(){
  if(!p220.races.length&&!p220.ath.length){p220.races.push({id:p2uid(),name:'Lauf 1'})}
  ['title','date','base','factor','note'].forEach(k=>{const e=$('p2_'+k); if(e) e.value=p220.meta[k]||''});
 }
-function p220Save(){try{localStorage.setItem(P220_KEY,JSON.stringify(p220))}catch(e){}}
+function p220Save(){try{localStorage.setItem(P220_KEY,JSON.stringify(p220))}catch(e){} try{p220Book.save()}catch(e){}}
 function p2num(v,d){const n=parseFloat(String(v==null?'':v).replace(',','.')); return isFinite(n)?n:d}
 function p220MetaSave(){['title','date','base','factor','note'].forEach(k=>p220.meta[k]=$('p2_'+k).value); p220Save(); p220Calc(); p2Heads(); try{renderNav()}catch(e){}}
 function p2Heads(){
@@ -7215,7 +7216,7 @@ function p220Print(){
  const ft=document.createElement('div'); ft.className='print-foot'; ft.textContent='Ausgewertet mit NordicLab'; document.body.appendChild(ft);
  nlPrint(); afterPrint(()=>{const x=$('p2PageStyle'); if(x) x.remove(); const e2=$('p220ResCard'); if(e2){e2.classList.remove('p2pr'); e2.style.zoom=''}});
 }
-function p220Init(){p220Load(); p220RenderGrid(); p2Heads()}
+function p220Init(){p220Book.load()}
 // ---- Einbindung in Modi / Navigation ----
 (function(){
  const _ta=tabAllowed, _dt=defaultTab, _um=window.updateModeUI, _cm=chooseMode, _bs=backToStart, _ni=navItems;
@@ -8350,6 +8351,89 @@ function tddCrInner(){
 }
 
 /*CR-JS-END*/
+
+/* ===== Arbeitsblätter (dauerhaft gespeicherte Wettkämpfe) für Sprung, NK, Lauf und 220-Punkte-Liste ===== */
+class SheetBook{
+ constructor(o){this.o=o; this.b={cur:0,sheets:[]}; this.on=false; this.k=''}
+ cur(){return this.b.sheets.find(x=>x.id===this.b.cur)||this.b.sheets[0]}
+ load(){
+  this.on=false; this.k=this.o.key(); let d=null; try{d=JSON.parse(localStorage.getItem(this.k)||'null')}catch(e){}
+  if(d&&Array.isArray(d.sheets)&&d.sheets.some(x=>x&&x.data)) this.b={cur:d.cur,sheets:d.sheets.filter(x=>x&&x.data)};
+  else{const lg=this.o.legacy?this.o.legacy():null; this.b={cur:1,sheets:[{id:1,name:'',data:lg||this.o.blank()}]}}
+  const c=this.cur(); this.b.cur=c.id; this.o.set(c.data); this.on=true; this.persist(); this.bar();
+ }
+ persist(){try{localStorage.setItem(this.k,JSON.stringify(this.b))}catch(e){}}
+ save(){
+  if(!this.on||!this.b.sheets.length) return;
+  const c=this.cur(); c.data=this.o.get(); this.persist(); this.bar();
+ }
+ label(x,i){return x.name||this.o.nameOf(x.data)||(this.o.def+' '+(i+1))}
+ bar(){
+  const box=document.getElementById(this.o.bar), el=document.getElementById(this.o.bar+'List'); if(!el) return;
+  if(box&&this.o.bar==='wkBar') box.style.display=this.on?'':'none';
+  if(!this.on){el.innerHTML=''; return}
+  el.innerHTML=this.b.sheets.map((x,i)=>{const cur=x.id===this.b.cur, nm=this.label(x,i);
+   return `<div class="trj-tab${cur?' cur':''}" role="tab" aria-selected="${cur}" ${cur?'':`onclick="${this.o.v}.go(${x.id})"`} title="${cur?'Aktuelles Arbeitsblatt':'Öffnen'}"><span>${esc(nm)}</span>${cur?`<button type="button" class="x" title="Umbenennen" onclick="${this.o.v}.rename()" style="font-size:13px">✎</button>`:''}<button type="button" class="x" title="Arbeitsblatt löschen" onclick="event.stopPropagation();${this.o.v}.del(${x.id})">×</button></div>`}).join('');
+  const c=el.querySelector('.trj-tab.cur'); if(c) try{const l=c.offsetLeft, r=l+c.offsetWidth; if(l<el.scrollLeft) el.scrollLeft=l-8; else if(r>el.scrollLeft+el.clientWidth) el.scrollLeft=r-el.clientWidth+8}catch(e){}
+ }
+ go(id){
+  if(!this.on||id===this.b.cur) return; this.save(); const t=this.b.sheets.find(x=>x.id===id); if(!t) return;
+  this.b.cur=id; this.on=false; this.o.set(t.data); this.on=true; this.persist(); this.bar(); window.scrollTo&&window.scrollTo(0,0);
+ }
+ newSheet(){
+  if(!this.on) return; this.save(); const id=1+Math.max(0,...this.b.sheets.map(x=>x.id));
+  const d=this.o.blank(); this.b.sheets.push({id,name:'',data:d}); this.b.cur=id;
+  this.on=false; this.o.set(d); this.on=true; this.persist(); this.bar();
+  toast('Neues Arbeitsblatt angelegt – die anderen bleiben gespeichert.'); window.scrollTo&&window.scrollTo(0,0);
+ }
+ async rename(){
+  const c=this.cur(); if(!c) return; const i=this.b.sheets.indexOf(c);
+  const nm=await ssAsk('Arbeitsblatt umbenennen','Name (leer = automatisch aus der Bezeichnung)',this.label(c,i)); if(nm===null) return;
+  c.name=nm; this.persist(); this.bar();
+ }
+ async del(id){
+  const t=this.b.sheets.find(x=>x.id===id); if(!t) return; const i=this.b.sheets.indexOf(t);
+  if(!await askConfirm('„'+this.label(t,i)+'“ löschen?','Das Arbeitsblatt wird dauerhaft entfernt und kann nicht wiederhergestellt werden.','Löschen','Abbrechen')) return;
+  this.b.sheets=this.b.sheets.filter(x=>x.id!==id);
+  if(!this.b.sheets.length) this.b.sheets.push({id:1,name:'',data:this.o.blank()});
+  if(this.b.cur===id||!this.b.sheets.some(x=>x.id===this.b.cur)){this.b.cur=this.b.sheets[0].id; this.on=false; this.o.set(this.cur().data); this.on=true}
+  this.persist(); this.bar();
+ }
+}
+const WK_DEF=(()=>{const o={}; [...new Set([...JUMP_META,...LAUF_FIELDS])].forEach(id=>{const e=document.getElementById(id); if(e) o[id]=e.value}); return o})();
+const wkBook=new SheetBook({v:'wkBook',bar:'wkBar',def:'Wettkampf',
+ key:()=>'wkb_'+saveKey(),
+ get:()=>JSON.parse(JSON.stringify(collectData())),
+ set:d=>applyData(JSON.parse(JSON.stringify(d))),
+ blank:()=>({mode,nkFormat,meta:Object.assign({},WK_DEF),rows:[]}),
+ nameOf:d=>(d&&d.meta&&(d.meta.event||d.meta.l_event))||'',
+ legacy:()=>{try{const d=JSON.parse(localStorage.getItem(saveKey())||'null'); return d&&Array.isArray(d.rows)?d:null}catch(e){return null}}});
+const p220Book=new SheetBook({v:'p220Book',bar:'p220Bar',def:'Liste',
+ key:()=>'nk_p220_book',
+ get:()=>JSON.parse(JSON.stringify(p220)),
+ set:d=>{try{localStorage.setItem(P220_KEY,JSON.stringify(d))}catch(e){} p220Load(); p220RenderGrid(); p2Heads()},
+ blank:()=>({meta:{title:'',date:'',base:'220',factor:'15',note:''},races:[],ath:[]}),
+ nameOf:d=>(d&&d.meta&&d.meta.title)||'',
+ legacy:()=>{try{const d=JSON.parse(localStorage.getItem(P220_KEY)||'null'); return d&&Array.isArray(d.ath)&&Array.isArray(d.races)?d:null}catch(e){return null}}});
+const wkIsRun=()=>mode==='sp'||mode==='nk'||mode==='lauf';
+function wkFlush(){try{if(wkBook.on&&wkIsRun()) wkBook.save(); if(p220Book.on&&mode==='p220') p220Book.save()}catch(e){}}
+let _wkT=null; function wkSched(){clearTimeout(_wkT); _wkT=setTimeout(wkFlush,350)}
+['input','change','click','keyup'].forEach(ev=>document.addEventListener(ev,wkSched,true));
+document.addEventListener('visibilitychange',()=>{if(document.hidden) wkFlush()});
+window.addEventListener('pagehide',wkFlush);
+(function(){
+ const _re=renderEntry; renderEntry=function(){const r=_re.apply(this,arguments); wkSched(); return r};
+ const _cm2=chooseMode, _bs2=backToStart;
+ chooseMode=function(m,f){
+  wkFlush(); wkBook.on=false; p220Book.on=false; if(m==='sp'||m==='nk'||m==='lauf'){rows=[]; teamRun={}}
+  const r=_cm2.apply(this,arguments);
+  if(m==='sp'||m==='nk'||m==='lauf') wkBook.load(); else wkBook.bar();
+  return r;
+ };
+ backToStart=async function(){
+  wkFlush(); const r=await _bs2.apply(this,arguments); wkBook.on=false; p220Book.on=false; wkBook.bar(); return r;
+ };
+})();
 updateUndoBtns();
 loadDb(); refreshAthleteList(); renderDb(); initDrag(); initInfoBoxes(); loadMode();
 </script>
